@@ -25,8 +25,11 @@ Paste a GitHub URL → get a beautiful, mobile-responsive developer landing page
 - **Live preview** with device switcher (Desktop / Tablet / Mobile).
 - **In-place editing** — click any headline, subtitle, feature or step to edit it; changes persist into exports.
 - **Section toggles** — show/hide Showcase, Quickstart, Stars Chart, Releases, Tech Stack, FAQ, Waitlist.
+- **1-Click In-Browser GitHub Pages Publisher** — publish your generated landing page directly to `gh-pages` branch via GitHub API straight from your browser with live URL feedback, no Git CLI or terminal required.
+- **Analytics & Tracking Code Injection** — effortlessly inject Google Analytics 4 (GA4), Plausible Analytics, or Umami directly into your exported landing pages via the Settings drawer.
 - **Export & Deploy engine**
   - Standalone `index.html` (self-contained with OpenGraph & Schema.org tags, open it or deploy instantly)
+  - 1-Click In-Browser GitHub Pages Publisher
   - 1-Click Copy HTML to Clipboard
   - 1-Click Deploy on Vercel & Netlify
   - Ready-to-paste React/JSX component (Tailwind)

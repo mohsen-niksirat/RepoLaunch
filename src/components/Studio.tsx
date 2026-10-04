@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -7,6 +7,7 @@ import LandingPreview from './LandingPreview';
 import { generateStandaloneHTML, generateReactComponent, generateDeployReadme } from '../services/exportEngine';
 import { enhanceWithAI } from '../services/aiGenerator';
 import { generateOgImageBlob } from '../services/ogGenerator';
+import { publishToGitHubPages } from '../services/ghPagesPublisher';
 import { MOCK_PRESETS } from '../services/github';
 import type { ThemeId, SectionId } from '../types';
 
@@ -53,6 +54,39 @@ export default function Studio() {
   const [copiedHtml, setCopiedHtml] = useState(false);
   const [badgeModalOpen, setBadgeModalOpen] = useState(false);
   const [copiedBadge, setCopiedBadge] = useState(false);
+  const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishStep, setPublishStep] = useState('');
+  const [publishUrl, setPublishUrl] = useState('');
+  const [publishError, setPublishError] = useState('');
+  const [copiedPublishUrl, setCopiedPublishUrl] = useState(false);
+
+  const doPublish = async () => {
+    if (!s.meta || !s.content) return;
+    if (!s.githubToken) {
+      setPublishError('Please enter a GitHub Personal Access Token with "repo" scope first.');
+      return;
+    }
+    setPublishing(true);
+    setPublishError('');
+    setPublishUrl('');
+    try {
+      const html = generateStandaloneHTML(s.meta, s.content, s.theme);
+      let ogBlob: Blob | undefined;
+      try {
+        ogBlob = await generateOgImageBlob(s.meta, s.content, s.theme);
+      } catch {
+        // optional
+      }
+      const res = await publishToGitHubPages(s.meta, html, s.githubToken, ogBlob, (step) => setPublishStep(step));
+      setPublishUrl(res.url);
+      celebrate();
+    } catch (e: any) {
+      setPublishError(e?.message || 'Publishing failed. Check token permissions and repository access.');
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const handleEdit = (path: string, value: string) => {
     s.updateContent((d) => {
@@ -259,6 +293,9 @@ export default function Studio() {
             </button>
             <button onClick={() => { setBadgeModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Award className="w-4 h-4 text-cyan-400" /> README Badges <span className="text-xs text-zinc-500 ml-auto">.md</span>
+            </button>
+            <button onClick={() => { setPublishModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 text-sm text-left text-emerald-300 font-medium">
+              <Globe className="w-4 h-4 text-emerald-400" /> Publish to GitHub Pages <span className="text-xs text-emerald-400/80 ml-auto">1-Click</span>
             </button>
             <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Sparkles className="w-4 h-4 text-fuchsia-400" /> React component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
@@ -472,6 +509,26 @@ export default function Studio() {
               onChange={(e) => s.setNewsletterEndpoint(e.target.value)}
             />
 
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Analytics & Visitor Tracking</h3>
+            <label className="block text-sm mb-1.5">Provider</label>
+            <select
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mb-3"
+              value={s.theme.analytics?.provider || 'ga4'}
+              onChange={(e) => s.setAnalytics({ provider: e.target.value as any, trackingId: s.theme.analytics?.trackingId || '' })}
+            >
+              <option value="ga4">Google Analytics 4 (GA4)</option>
+              <option value="plausible">Plausible Analytics</option>
+              <option value="umami">Umami Analytics</option>
+            </select>
+            <label className="block text-sm mb-1.5">Tracking ID / Domain <span className="text-zinc-500 font-normal">(e.g. G-XXXXX or mydomain.com)</span></label>
+            <input
+              type="text"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono text-zinc-300"
+              placeholder={s.theme.analytics?.provider === 'plausible' ? 'example.com' : 'G-XXXXXXXXXX'}
+              value={s.theme.analytics?.trackingId || ''}
+              onChange={(e) => s.setAnalytics({ provider: s.theme.analytics?.provider || 'ga4', trackingId: e.target.value })}
+            />
+
             {aiMsg && <p className="text-sm mt-4 text-indigo-300">{aiMsg}</p>}
           </div>
         </div>
@@ -524,6 +581,122 @@ ${s.meta.latestRelease ? `[![Release](https://img.shields.io/github/v/release/${
                 {copiedBadge ? <><Check className="w-4 h-4" /> Copied!</> : <><Clipboard className="w-4 h-4" /> Copy Markdown</>}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* GitHub Pages 1-Click Publish Modal */}
+      {publishModalOpen && s.meta && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => !publishing && setPublishModalOpen(false)} />
+          <div className="relative w-full max-w-lg bg-[#0e0e16] border border-white/10 rounded-2xl p-6 shadow-2xl z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-lg font-bold">1-Click Publish to GitHub Pages</h3>
+              </div>
+              <button
+                disabled={publishing}
+                onClick={() => setPublishModalOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-40"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {!s.githubToken ? (
+              <div>
+                <p className="text-sm text-zinc-300 mb-3 leading-relaxed">
+                  To publish directly to your repository's <code className="bg-white/10 px-1.5 py-0.5 rounded text-emerald-300">gh-pages</code> branch, please enter a GitHub Personal Access Token with <span className="font-semibold text-white">repo</span> scope.
+                </p>
+                <input
+                  type="password"
+                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-emerald-400/60 mb-4 font-mono text-white"
+                  value={s.githubToken}
+                  onChange={(e) => s.setGithubToken(e.target.value)}
+                />
+                <a
+                  href="https://github.com/settings/tokens/new?scopes=repo&description=RepoLaunch%20Publisher"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 mb-5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Generate a token on GitHub (10 sec)
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-zinc-400">Target Repository:</span>
+                    <span className="font-mono font-medium text-white">{s.meta.owner}/{s.meta.name}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400">Live Website URL:</span>
+                    <span className="font-mono text-emerald-400 text-xs">https://{s.meta.owner.toLowerCase()}.github.io/{s.meta.name.toLowerCase()}/</span>
+                  </div>
+                </div>
+
+                {publishing && (
+                  <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl p-4 text-sm animate-pulse">
+                    <Loader2 className="w-5 h-5 animate-spin shrink-0" />
+                    <span>{publishStep || 'Deploying landing page…'}</span>
+                  </div>
+                )}
+
+                {publishError && (
+                  <div className="flex items-start gap-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 rounded-xl p-3.5 text-xs">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{publishError}</span>
+                  </div>
+                )}
+
+                {publishUrl && (
+                  <div className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <Check className="w-5 h-5 text-emerald-400" />
+                      <span>Your landing page is live!</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-black/40 rounded-lg p-2 font-mono text-xs text-emerald-300">
+                      <span className="truncate">{publishUrl}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(publishUrl);
+                          setCopiedPublishUrl(true);
+                          setTimeout(() => setCopiedPublishUrl(false), 2000);
+                        }}
+                        className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white ml-auto shrink-0"
+                      >
+                        {copiedPublishUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Clipboard className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-2">
+                  {publishUrl ? (
+                    <a
+                      href={publishUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-lg text-sm transition"
+                    >
+                      <ExternalLink className="w-4 h-4" /> Open Live Page
+                    </a>
+                  ) : (
+                    <button
+                      onClick={doPublish}
+                      disabled={publishing}
+                      className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-lg text-sm transition disabled:opacity-50"
+                    >
+                      {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
+                      {publishing ? 'Publishing…' : 'Publish to GitHub Pages'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -102,6 +102,11 @@ export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'm
 
 export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq' | 'newsletter' | 'starHistory' | 'changelog';
 
+export interface AnalyticsConfig {
+  provider: 'ga4' | 'plausible' | 'umami';
+  trackingId: string;
+}
+
 export interface ThemeConfig {
   themeId: ThemeId;
   accentColor: string;
@@ -114,6 +119,7 @@ export interface ThemeConfig {
   showChangelog?: boolean;
   showStarHistory?: boolean;
   newsletterEndpoint?: string;
+  analytics?: AnalyticsConfig;
   sectionOrder: SectionId[];
 }
 

@@ -288,6 +288,21 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 
   const renderedSections = order.map((k) => sectionMap[k] || '').filter(Boolean).join('\n\n');
 
+  const analyticsScript = theme.analytics?.trackingId
+    ? theme.analytics.provider === 'ga4'
+      ? `<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(theme.analytics.trackingId)}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${esc(theme.analytics.trackingId)}');
+</script>`
+      : theme.analytics.provider === 'plausible'
+      ? `<script defer data-domain="${esc(theme.analytics.trackingId)}" src="https://plausible.io/js/script.js"></script>`
+      : `<script async defer data-website-id="${esc(theme.analytics.trackingId)}" src="https://analytics.umami.is/script.js"></script>`
+    : '';
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -326,7 +341,7 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   "url": ${JSON.stringify(meta.homepage || meta.repoUrl)},
   "codeRepository": ${JSON.stringify(meta.repoUrl)}
 }
-</script>
+</script>${analyticsScript ? '\n' + analyticsScript : ''}
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}

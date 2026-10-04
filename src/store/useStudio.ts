@@ -34,6 +34,7 @@ interface StudioState {
   setAccent: (c: string) => void;
   toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
+  setAnalytics: (analytics?: import('../types').AnalyticsConfig) => void;
   moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
   generate: (url: string) => Promise<void>;
   loadMock: (key: string) => void;
@@ -86,6 +87,7 @@ export const useStudio = create<StudioState>()(
       setAccent: (c) => set((s) => ({ theme: { ...s.theme, accentColor: c } })),
       toggleSection: (k) => set((s) => ({ theme: { ...s.theme, [k]: !s.theme[k] } })),
       setNewsletterEndpoint: (endpoint) => set((s) => ({ theme: { ...s.theme, newsletterEndpoint: endpoint } })),
+      setAnalytics: (analytics) => set((s) => ({ theme: { ...s.theme, analytics } })),
       moveSection: (id, direction) => {
         set((state) => {
           const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'];
