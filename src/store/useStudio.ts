@@ -33,6 +33,7 @@ interface StudioState {
   setThemeId: (t: ThemeId) => void;
   setAccent: (c: string) => void;
   toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack') => void;
+  moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
   generate: (url: string) => Promise<void>;
   loadMock: (key: string) => void;
   updateContent: (updater: (draft: LandingPageContent) => void) => void;
@@ -56,11 +57,20 @@ export const useStudio = create<StudioState>()(
       usingMock: false,
 
       urlInput: '',
-      theme: { themeId: 'midnight-linear', accentColor: '#818cf8', fontStyle: 'sans', showTerminal: true, showScreenshots: true, showFaq: true, showTechStack: true },
+      theme: {
+        themeId: 'midnight-linear',
+        accentColor: '#818cf8',
+        fontStyle: 'sans',
+        showTerminal: true,
+        showScreenshots: true,
+        showFaq: true,
+        showTechStack: true,
+        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq'],
+      },
       device: 'desktop',
       settingsOpen: false,
       githubToken: '',
-      aiConfig: { provider: 'openai', apiKey: '', baseUrl: '', model: '' },
+      aiConfig: { provider: 'openai', apiKey: '', baseUrl: '', model: '', customPrompt: '' },
 
       setUrlInput: (v) => set({ urlInput: v }),
       setDevice: (d) => set({ device: d }),
@@ -70,6 +80,20 @@ export const useStudio = create<StudioState>()(
       setThemeId: (t) => set((s) => ({ theme: { ...s.theme, themeId: t } })),
       setAccent: (c) => set((s) => ({ theme: { ...s.theme, accentColor: c } })),
       toggleSection: (k) => set((s) => ({ theme: { ...s.theme, [k]: !s.theme[k] } })),
+      moveSection: (id, direction) => {
+        set((state) => {
+          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq'];
+          const order = [...currentOrder];
+          const idx = order.indexOf(id);
+          if (idx === -1) return state;
+          const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+          if (targetIdx < 0 || targetIdx >= order.length) return state;
+          const temp = order[idx];
+          order[idx] = order[targetIdx];
+          order[targetIdx] = temp;
+          return { theme: { ...state.theme, sectionOrder: order } };
+        });
+      },
 
       generate: async (url) => {
         set({ status: 'loading', error: '', loadingMsg: 'Fetching repository from GitHub…', usingMock: false });

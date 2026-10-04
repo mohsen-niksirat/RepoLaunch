@@ -77,7 +77,9 @@ export interface LandingPageContent {
   howItWorks: { title: string; desc: string }[];
 }
 
-export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal';
+export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal';
+
+export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq';
 
 export interface ThemeConfig {
   themeId: ThemeId;
@@ -87,6 +89,7 @@ export interface ThemeConfig {
   showScreenshots: boolean;
   showFaq: boolean;
   showTechStack: boolean;
+  sectionOrder: SectionId[];
 }
 
 export interface GitHubTokenLike {
@@ -100,6 +103,7 @@ export interface AIConfig {
   apiKey: string;
   baseUrl?: string;
   model?: string;
+  customPrompt?: string;
 }
 
 export type DevicePreview = 'desktop' | 'tablet' | 'mobile';

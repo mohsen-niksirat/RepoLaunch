@@ -11,10 +11,11 @@ Paste a GitHub URL → get a beautiful, mobile-responsive developer landing page
 - **GitHub ingestion** — any URL format (`https://github.com/owner/repo`, `owner/repo`, or `git@github.com:owner/repo.git`).
 - **Dual parser engine**
   - *Heuristic parser* — works 100% offline. Extracts headline, features, quickstart code blocks, tech stack, screenshots and FAQs straight from the README + repo metadata.
-  - *AI-enhanced (BYOK)* — plug in OpenAI, Google Gemini, Groq, or any OpenAI-compatible endpoint to rewrite the copy.
+  - *AI-enhanced (BYOK)* — plug in OpenAI, Google Gemini, Groq, or any OpenAI-compatible endpoint to rewrite the copy, with optional **Custom Instructions & Tone Prompts**.
 - **Product Showcase & Screenshots** — automatically parses images/GIFs from the README and wraps them in a sleek mock browser window frame.
 - **Social Card (OG Image) Generator** — client-side HTML5 Canvas generator produces high-res 1200×630px branded cards for Twitter and LinkedIn with live stars, tags, and theme gradients.
-- **3 themes & 6 Accent Colors** — Midnight Linear (glassy dark), Neo-Brutalist (bold retro), Clean Minimal (Apple/Stripe), plus live color picker (Indigo, Emerald, Amber, Rose, Cyan, Violet).
+- **4 themes & 6 Accent Colors** — Midnight Linear (glassy dark), Neo-Brutalist (bold retro), Clean Minimal (Apple/Stripe), Matrix Terminal (green phosphor CRT hacker aesthetic), plus live color picker (Indigo, Emerald, Amber, Rose, Cyan, Violet).
+- **Dynamic Section Ordering** — reorder page sections (Showcase, Features, How It Works, Quickstart, Tech Stack, FAQ) on the fly with live preview and persistent exports.
 - **Latest Release Detection** — fetches live release tags (`v1.2.0`) and features them in hero badges.
 - **Live preview** with device switcher (Desktop / Tablet / Mobile).
 - **In-place editing** — click any headline, subtitle, feature or step to edit it; changes persist into exports.

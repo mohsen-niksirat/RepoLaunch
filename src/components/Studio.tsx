@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2 } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -8,12 +8,13 @@ import { generateStandaloneHTML, generateReactComponent, generateDeployReadme } 
 import { enhanceWithAI } from '../services/aiGenerator';
 import { generateOgImageBlob } from '../services/ogGenerator';
 import { MOCK_PRESETS } from '../services/github';
-import type { ThemeId } from '../types';
+import type { ThemeId, SectionId } from '../types';
 
 const THEMES: { id: ThemeId; label: string }[] = [
   { id: 'midnight-linear', label: 'Midnight' },
   { id: 'neo-brutalist', label: 'Brutalist' },
   { id: 'clean-minimal', label: 'Minimal' },
+  { id: 'matrix-terminal', label: 'Terminal' },
 ];
 
 const ACCENTS = [
@@ -361,9 +362,56 @@ export default function Studio() {
               onChange={(e) => s.setAIConfig({ ...s.aiConfig, model: e.target.value })}
             />
 
-            <p className="text-xs text-zinc-500 leading-relaxed mt-4">
+            <label className="block text-sm mb-1.5">Custom AI Instructions <span className="text-zinc-500 font-normal">(optional prompt)</span></label>
+            <textarea
+              rows={3}
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 text-zinc-300 resize-none font-sans"
+              placeholder="e.g. Focus on developer audience, highlight high performance benchmarks, use punchy copy..."
+              value={s.aiConfig.customPrompt ?? ''}
+              onChange={(e) => s.setAIConfig({ ...s.aiConfig, customPrompt: e.target.value })}
+            />
+
+            <p className="text-xs text-zinc-500 leading-relaxed mb-6">
               Keys are stored only in your browser's localStorage and sent directly from your device to the provider. Without an AI key, everything still works via the built-in heuristic parser.
             </p>
+
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
+            <p className="text-xs text-zinc-500 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
+            <div className="space-y-1.5 mb-6">
+              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq']).map((sectionId, idx, arr) => {
+                const labels: Record<SectionId, string> = {
+                  showcase: 'Screenshot / Showcase',
+                  features: 'Key Features Grid',
+                  howItWorks: 'How It Works (Steps)',
+                  quickstart: 'Quickstart & Terminal',
+                  techStack: 'Tech Stack & Ecosystem',
+                  faq: 'Frequently Asked Questions',
+                };
+                return (
+                  <div key={sectionId} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm">
+                    <span className="text-zinc-200 font-medium text-xs">{labels[sectionId] || sectionId}</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => s.moveSection(sectionId, 'up')}
+                        disabled={idx === 0}
+                        className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent"
+                        title="Move Up"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => s.moveSection(sectionId, 'down')}
+                        disabled={idx === arr.length - 1}
+                        className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent"
+                        title="Move Down"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
             {aiMsg && <p className="text-sm mt-4 text-indigo-300">{aiMsg}</p>}
           </div>

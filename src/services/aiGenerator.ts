@@ -15,10 +15,13 @@ const DEFAULT_MODEL: Record<AIConfig['provider'], string> = {
   custom: 'gpt-4o-mini',
 };
 
-function buildPrompt(meta: RepoMetadata, readme: string): string {
+function buildPrompt(meta: RepoMetadata, readme: string, customPrompt?: string): string {
   const excerpt = (readme || '').slice(0, 6000);
+  const extra = customPrompt?.trim()
+    ? `\nSPECIAL USER INSTRUCTIONS / TONE / TARGET AUDIENCE:\n"${customPrompt.trim()}"\n`
+    : '';
   return `You are a senior product marketer. Rewrite marketing copy for a developer landing page for the GitHub repo "${meta.owner}/${meta.name}".
-
+${extra}
 Repo metadata:
 - Description: ${meta.description}
 - Language: ${meta.language ?? 'unknown'}
@@ -41,7 +44,7 @@ Rules:
 - subheadline: 1-2 sentences of concrete value, under 180 chars.
 - features: 4 to 6 items, benefit-led (not just restating the README).
 - faq: 4 to 5 items developers actually ask.
-Keep the same language as the README.`;
+- Respect the special user instructions if provided.`;
 }
 
 function extractJson(text: string): any {
@@ -60,7 +63,7 @@ export async function enhanceWithAI(
 ): Promise<LandingPageContent> {
   if (!config.apiKey) throw new Error('Missing API key. Add one in Settings.');
   const model = config.model || DEFAULT_MODEL[config.provider];
-  const prompt = buildPrompt(meta, readme);
+  const prompt = buildPrompt(meta, readme, config.customPrompt);
 
   let text = '';
 

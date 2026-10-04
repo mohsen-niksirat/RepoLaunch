@@ -68,6 +68,23 @@ function themeTokens(theme: ThemeConfig): { css: string; bodyCls: string } {
 .rl-tab-active{background:${accent};border:2px solid #111;box-shadow:2px 2px 0 #111}`,
     };
   }
+  if (theme.themeId === 'matrix-terminal') {
+    return {
+      bodyCls: 'rl-terminal',
+      css: `
+.rl-terminal{--bg:#050d08;--fg:#4ade80;--muted:#22c55e99;--card:#091b10;--border:#15803d;--accent:${accent || '#22c55e'};
+ background:#050d08;color:var(--fg);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;}
+.rl-card{background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 0 15px rgba(34,197,94,.12);transition:border-color .2s,box-shadow .2s}
+.rl-card:hover{border-color:var(--accent);box-shadow:0 0 25px rgba(34,197,94,.25)}
+.rl-eyebrow{border:1px solid var(--border);background:#092e16;color:var(--accent);border-radius:4px}
+.rl-btn-primary{background:var(--accent);color:#050d08;border:1px solid var(--accent);border-radius:4px;font-weight:700}
+.rl-btn-primary:hover{box-shadow:0 0 15px var(--accent);filter:brightness(1.15)}
+.rl-btn-ghost{border:1px solid var(--border);background:#07140a;color:var(--fg);border-radius:4px}
+.rl-btn-ghost:hover{border-color:var(--accent);background:#0d2614}
+.rl-code{background:#020604;border:1px solid var(--border);border-radius:6px;color:#86efac}
+.rl-tab-active{color:#050d08;background:var(--accent);border-color:var(--accent)}`,
+    };
+  }
   return {
     bodyCls: 'rl-minimal',
     css: `
@@ -202,6 +219,21 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     ? `<section class="max-w-4xl mx-auto px-6 py-12 text-center"><h3 class="text-sm font-semibold uppercase tracking-widest mb-4" style="color:var(--muted)">Built with</h3><div class="flex flex-wrap justify-center gap-2">${tech}</div></section>`
     : '';
 
+  const sectionMap: Record<string, string> = {
+    showcase: screenshotsSection,
+    features: `<section class="container px-6 py-16"><h2 class="section-title">Why ${esc(meta.name)}?</h2><div class="grid">${features}</div></section>`,
+    howItWorks: howItWorksSection,
+    quickstart: quickstartSection,
+    techStack: techSection,
+    faq: faqSection,
+  };
+
+  const order = theme.sectionOrder && theme.sectionOrder.length
+    ? theme.sectionOrder
+    : ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq'];
+
+  const renderedSections = order.map((k) => sectionMap[k] || '').filter(Boolean).join('\n\n');
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -262,17 +294,7 @@ ${css}
   <div class="badge-row">${badges}</div>
 </header>
 
-${screenshotsSection}
-
-<section class="container px-6 py-16">
-  <h2 class="section-title">Why ${esc(meta.name)}?</h2>
-  <div class="grid">${features}</div>
-</section>
-
-${howItWorksSection}
-${quickstartSection}
-${techSection}
-${faqSection}
+${renderedSections}
 
 <section class="container px-6 py-8">
   <div class="rl-card cta-banner">

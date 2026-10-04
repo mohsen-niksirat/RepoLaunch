@@ -12,8 +12,9 @@ export function generateOgCanvas(
   if (!ctx) return canvas;
 
   const accent = theme.accentColor || '#818cf8';
-  const isDark = theme.themeId !== 'clean-minimal' && theme.themeId !== 'neo-brutalist';
+  const isDark = theme.themeId === 'midnight-linear';
   const isBrutal = theme.themeId === 'neo-brutalist';
+  const isTerminal = theme.themeId === 'matrix-terminal';
 
   // 1. Background
   if (isBrutal) {
@@ -23,6 +24,18 @@ export function generateOgCanvas(
     ctx.strokeStyle = '#111111';
     ctx.lineWidth = 16;
     ctx.strokeRect(8, 8, 1184, 614);
+  } else if (isTerminal) {
+    ctx.fillStyle = '#050d08';
+    ctx.fillRect(0, 0, 1200, 630);
+    // Matrix terminal border & scanlines
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(16, 16, 1168, 598);
+
+    ctx.fillStyle = 'rgba(34, 197, 94, 0.03)';
+    for (let y = 20; y < 620; y += 8) {
+      ctx.fillRect(20, y, 1160, 4);
+    }
   } else if (isDark) {
     ctx.fillStyle = '#0a0a14';
     ctx.fillRect(0, 0, 1200, 630);
