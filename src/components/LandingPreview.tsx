@@ -125,7 +125,11 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
           <Editable value={h.subheadline} path="hero.subheadline" onEdit={onEdit} as="span" />
         </p>
         <div className="flex gap-3 justify-center mt-8 flex-wrap">
-          <a className={`rla-btn-primary px-6 py-3 rounded-xl font-semibold ${btnPrimary}`} href={h.ctaPrimaryLink}>
+          <a
+            className={`px-6 py-3 rounded-xl font-semibold transition ${btnPrimary}`}
+            style={isMidnight ? { background: accent, color: '#0a0a12' } : undefined}
+            href={h.ctaPrimaryLink}
+          >
             {h.ctaPrimary} <ArrowRight className="w-4 h-4 inline ml-1" />
           </a>
           <a className={`px-6 py-3 rounded-xl font-semibold ${btnGhost}`} href={h.ctaSecondaryLink} target="_blank" rel="noreferrer">
@@ -160,6 +164,35 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
           ))}
         </div>
       </section>
+
+      {/* How it works */}
+      {content.howItWorks && content.howItWorks.length > 0 && (
+        <section className="max-w-5xl mx-auto px-6 py-12">
+          <h2 className="text-3xl font-extrabold text-center mb-10 tracking-tight">How it works</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {content.howItWorks.map((step, i) => (
+              <div key={i} className={`p-6 relative ${cardCls}`}>
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-4"
+                  style={{
+                    background: isBrutal ? accent : isMidnight ? `${accent}22` : '#f3f4f6',
+                    color: isBrutal ? '#111' : accent,
+                    border: isBrutal ? '2px solid #111' : undefined
+                  }}
+                >
+                  {i + 1}
+                </div>
+                <h3 className="font-bold text-lg mb-2">
+                  <Editable value={step.title} path={`howItWorks.${i}.title`} onEdit={onEdit} />
+                </h3>
+                <p className={`text-sm ${muted}`}>
+                  <Editable value={step.desc} path={`howItWorks.${i}.desc`} onEdit={onEdit} as="span" />
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Quickstart terminal */}
       {theme.showTerminal && (
@@ -224,7 +257,13 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
         <div className={`p-12 text-center ${cardCls}`}>
           <h2 className="text-2xl md:text-3xl font-extrabold mb-3 tracking-tight">Ready to build with {meta.name}?</h2>
           <p className={`mb-6 ${muted}`}>Free, open source, and loved by {meta.stars.toLocaleString()}+ developers.</p>
-          <a className={`rla-btn-primary px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2 ${btnPrimary}`} href={meta.repoUrl} target="_blank" rel="noreferrer">
+          <a
+            className={`px-6 py-3 rounded-xl font-semibold inline-flex items-center gap-2 transition ${btnPrimary}`}
+            style={isMidnight ? { background: accent, color: '#0a0a12' } : undefined}
+            href={meta.repoUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             <Github className="w-4 h-4" /> Star on GitHub
           </a>
         </div>

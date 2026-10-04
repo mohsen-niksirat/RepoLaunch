@@ -15,6 +15,15 @@ const THEMES: { id: ThemeId; label: string }[] = [
   { id: 'clean-minimal', label: 'Minimal' },
 ];
 
+const ACCENTS = [
+  { color: '#818cf8', label: 'Indigo' },
+  { color: '#34d399', label: 'Emerald' },
+  { color: '#fbbf24', label: 'Amber' },
+  { color: '#fb7185', label: 'Rose' },
+  { color: '#38bdf8', label: 'Cyan' },
+  { color: '#a78bfa', label: 'Violet' },
+];
+
 const DEVICES = [
   { id: 'desktop', icon: Monitor, width: '100%', label: 'Desktop' },
   { id: 'tablet', icon: Tablet, width: '768px', label: 'Tablet' },
@@ -138,6 +147,19 @@ export default function Studio() {
               >
                 {t.label}
               </button>
+            ))}
+          </div>
+
+          {/* Accent Color Palette */}
+          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5" title="Accent color">
+            {ACCENTS.map((a) => (
+              <button
+                key={a.color}
+                title={a.label}
+                onClick={() => s.setAccent(a.color)}
+                className={`w-4 h-4 rounded-full transition-all ${s.theme.accentColor === a.color ? 'scale-125 ring-2 ring-white shadow-lg' : 'opacity-70 hover:opacity-100 hover:scale-110'}`}
+                style={{ backgroundColor: a.color }}
+              />
             ))}
           </div>
 

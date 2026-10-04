@@ -91,17 +91,23 @@ document.querySelectorAll('.rl-tabs').forEach(function(wrap){
   wrap.addEventListener('click', function(e){
     var b = e.target.closest('button[data-tab]'); if(!b) return;
     var box = wrap.closest('.rl-quickstart');
-    box.querySelectorAll('[data-panel]').forEach(function(p){p.hidden = p.getAttribute('data-panel')!==b.getAttribute('data-tab');});
+    var tabId = b.getAttribute('data-tab');
+    box.querySelectorAll('[data-panel]').forEach(function(p){p.hidden = p.getAttribute('data-panel')!==tabId;});
     wrap.querySelectorAll('button[data-tab]').forEach(function(x){x.classList.toggle('rl-tab-active', x===b);});
   });
 });
 document.addEventListener('click', function(e){
   var btn = e.target.closest('[data-copy]'); if(!btn) return;
-  var pre = document.querySelector('[data-panel="'+btn.getAttribute('data-copy')+'"] code');
+  var box = btn.closest('.rl-quickstart');
+  var pre = box ? box.querySelector('[data-panel]:not([hidden]) code') : document.querySelector('.rl-quickstart [data-panel]:not([hidden]) code');
   if(!pre) return;
   navigator.clipboard.writeText(pre.textContent.trim()).then(function(){
-    var old = btn.querySelector('span') ? btn.querySelector('span').textContent : '';
-    var lbl = btn.querySelector('span'); if(lbl){lbl.textContent='Copied!'; setTimeout(function(){lbl.textContent=old;},1400);}
+    var lbl = btn.querySelector('span');
+    if(lbl){
+      var old = lbl.textContent;
+      lbl.textContent='Copied!';
+      setTimeout(function(){lbl.textContent=old;},1400);
+    }
   });
 });
 document.querySelectorAll('.rl-faq-item > button').forEach(function(b){
@@ -154,6 +160,19 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
         <button data-copy="t0" class="flex items-center gap-1.5 text-xs px-2 py-1 rounded-md opacity-70 hover:opacity-100">${iconSvg('Copy', 'w-3.5 h-3.5')}<span>Copy</span></button>
       </div>
       <div class="px-4 pb-4 pt-2 text-sm font-mono">${panels}</div>
+    </div>
+  </section>`
+    : '';
+
+  const howItWorksSection = content.howItWorks && content.howItWorks.length
+    ? `<section class="container px-6 py-16">
+    <h2 class="section-title">How it works</h2>
+    <div class="grid">${content.howItWorks.map((step, i) => `
+      <div class="rl-card p-6">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-4" style="background:${theme.themeId === 'neo-brutalist' ? 'var(--accent)' : 'rgba(255,255,255,0.08)'};color:var(--accent);${theme.themeId === 'neo-brutalist' ? 'border:2px solid #111;color:#111' : ''}">${i + 1}</div>
+        <h3 class="text-lg font-semibold mb-2">${esc(step.title)}</h3>
+        <p class="text-sm" style="color:var(--muted)">${esc(step.desc)}</p>
+      </div>`).join('')}
     </div>
   </section>`
     : '';
@@ -223,6 +242,7 @@ ${css}
   <div class="grid">${features}</div>
 </section>
 
+${howItWorksSection}
 ${quickstartSection}
 ${techSection}
 ${faqSection}
