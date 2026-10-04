@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe, Languages } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -9,7 +9,8 @@ import { enhanceWithAI } from '../services/aiGenerator';
 import { generateOgImageBlob } from '../services/ogGenerator';
 import { publishToGitHubPages } from '../services/ghPagesPublisher';
 import { MOCK_PRESETS } from '../services/github';
-import type { ThemeId, SectionId } from '../types';
+import type { ThemeId, SectionId, LanguageCode } from '../types';
+import { SUPPORTED_LANGUAGES } from '../types';
 
 const THEMES: { id: ThemeId; label: string }[] = [
   { id: 'midnight-linear', label: 'Midnight' },
@@ -60,6 +61,19 @@ export default function Studio() {
   const [publishUrl, setPublishUrl] = useState('');
   const [publishError, setPublishError] = useState('');
   const [copiedPublishUrl, setCopiedPublishUrl] = useState(false);
+  const [translating, setTranslating] = useState(false);
+
+  const handleTranslateAI = async (lang: LanguageCode) => {
+    setTranslating(true);
+    try {
+      await s.translateContent(lang);
+      celebrate();
+    } catch {
+      // handled in store
+    } finally {
+      setTranslating(false);
+    }
+  };
 
   const doPublish = async () => {
     if (!s.meta || !s.content) return;
@@ -227,6 +241,33 @@ export default function Studio() {
                 style={{ backgroundColor: a.color }}
               />
             ))}
+          </div>
+
+          {/* Language Selector & i18n */}
+          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-1" title="Landing page language">
+            <Languages className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+            <select
+              className="bg-transparent text-xs font-medium text-zinc-200 outline-none cursor-pointer pr-1"
+              value={s.theme.language || 'en'}
+              onChange={(e) => s.setLanguage(e.target.value as LanguageCode)}
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code} className="bg-[#101018] text-white">
+                  {l.flag} {l.nativeLabel}
+                </option>
+              ))}
+            </select>
+            {s.theme.language && s.theme.language !== 'en' && s.content && (
+              <button
+                onClick={() => handleTranslateAI(s.theme.language!)}
+                disabled={translating}
+                title={`Translate full copy to ${SUPPORTED_LANGUAGES.find((l) => l.code === s.theme.language)?.label} using AI`}
+                className="text-xs bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-400/40 px-2 py-0.5 rounded flex items-center gap-1 transition disabled:opacity-50 ml-1"
+              >
+                {translating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-indigo-400" />}
+                <span className="hidden sm:inline">AI Translate</span>
+              </button>
+            )}
           </div>
 
           <div className="flex bg-white/5 border border-white/10 rounded-lg p-0.5">

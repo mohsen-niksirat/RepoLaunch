@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AIConfig, DevicePreview, LandingPageContent, RepoMetadata, ThemeConfig, ThemeId } from '../types';
+import type { AIConfig, DevicePreview, LandingPageContent, LanguageCode, RepoMetadata, ThemeConfig, ThemeId } from '../types';
 import { MOCK_PRESETS, fetchRepoMetadata } from '../services/github';
 import { buildHeuristicContent } from '../services/heuristicParser';
+import { applyOfflineTranslation, translateWithAI } from '../services/translator';
 
 export type Status = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -32,6 +33,8 @@ interface StudioState {
   setAIConfig: (c: AIConfig) => void;
   setThemeId: (t: ThemeId) => void;
   setAccent: (c: string) => void;
+  setLanguage: (lang: LanguageCode) => void;
+  translateContent: (lang: LanguageCode) => Promise<void>;
   toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
   setAnalytics: (analytics?: import('../types').AnalyticsConfig) => void;
@@ -87,6 +90,35 @@ export const useStudio = create<StudioState>()(
       setAIConfig: (c) => set({ aiConfig: c }),
       setThemeId: (t) => set((s) => ({ theme: { ...s.theme, themeId: t } })),
       setAccent: (c) => set((s) => ({ theme: { ...s.theme, accentColor: c } })),
+      setLanguage: (lang) => {
+        set((s) => {
+          const nextTheme = { ...s.theme, language: lang };
+          if (!s.content) return { theme: nextTheme };
+          const translated = applyOfflineTranslation(s.content, lang);
+          return { theme: nextTheme, content: translated };
+        });
+      },
+      translateContent: async (lang) => {
+        const state = get();
+        if (!state.content) return;
+        set({ loadingMsg: `Translating page copy to ${lang}…` });
+        try {
+          const translated = await translateWithAI(state.aiConfig, state.content, lang);
+          set({
+            content: translated,
+            theme: { ...state.theme, language: lang },
+            loadingMsg: '',
+          });
+        } catch (e: any) {
+          const offline = applyOfflineTranslation(state.content, lang);
+          set({
+            content: offline,
+            theme: { ...state.theme, language: lang },
+            loadingMsg: '',
+            error: e?.message || 'AI translation failed, applied offline template translation.',
+          });
+        }
+      },
       toggleSection: (k) => set((s) => ({ theme: { ...s.theme, [k]: !s.theme[k] } })),
       setNewsletterEndpoint: (endpoint) => set((s) => ({ theme: { ...s.theme, newsletterEndpoint: endpoint } })),
       setAnalytics: (analytics) => set((s) => ({ theme: { ...s.theme, analytics } })),

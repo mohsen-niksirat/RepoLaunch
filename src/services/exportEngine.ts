@@ -362,8 +362,11 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
       : `<script async defer data-website-id="${esc(theme.analytics.trackingId)}" src="https://analytics.umami.is/script.js"></script>`
     : '';
 
+  const isRtl = theme.language === 'fa';
+  const langCode = theme.language || 'en';
+
   return `<!doctype html>
-<html lang="en">
+<html lang="${esc(langCode)}" dir="${isRtl ? 'rtl' : 'ltr'}">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -405,6 +408,8 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{line-height:1.5;-webkit-font-smoothing:antialiased}
+html[dir="rtl"] body{direction:rtl;text-align:right}
+html[dir="rtl"] .hero,html[dir="rtl"] .section-title,html[dir="rtl"] .cta-banner{text-align:center}
 a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
 pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre}

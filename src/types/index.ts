@@ -152,10 +152,31 @@ export interface AnalyticsConfig {
   trackingId: string;
 }
 
+export type LanguageCode = 'en' | 'fa' | 'es' | 'zh' | 'ja' | 'de' | 'fr';
+
+export interface LanguageInfo {
+  code: LanguageCode;
+  label: string;
+  nativeLabel: string;
+  dir: 'ltr' | 'rtl';
+  flag: string;
+}
+
+export const SUPPORTED_LANGUAGES: LanguageInfo[] = [
+  { code: 'en', label: 'English', nativeLabel: 'English', dir: 'ltr', flag: '🇺🇸' },
+  { code: 'fa', label: 'Persian', nativeLabel: 'فارسی', dir: 'rtl', flag: '🇮🇷' },
+  { code: 'es', label: 'Spanish', nativeLabel: 'Español', dir: 'ltr', flag: '🇪🇸' },
+  { code: 'zh', label: 'Chinese', nativeLabel: '中文', dir: 'ltr', flag: '🇨🇳' },
+  { code: 'ja', label: 'Japanese', nativeLabel: '日本語', dir: 'ltr', flag: '🇯🇵' },
+  { code: 'de', label: 'German', nativeLabel: 'Deutsch', dir: 'ltr', flag: '🇩🇪' },
+  { code: 'fr', label: 'French', nativeLabel: 'Français', dir: 'ltr', flag: '🇫🇷' },
+];
+
 export interface ThemeConfig {
   themeId: ThemeId;
   accentColor: string;
   fontStyle: 'sans' | 'mono';
+  language?: LanguageCode;
   showTerminal: boolean;
   showScreenshots: boolean;
   showFaq: boolean;

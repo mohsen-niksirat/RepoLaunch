@@ -109,8 +109,14 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
     });
   };
 
+  const isRtl = theme.language === 'fa';
+
   return (
-    <div style={{ ...shell, ['--acc' as any]: accent }} className="font-sans">
+    <div
+      dir={isRtl ? 'rtl' : 'ltr'}
+      style={{ ...shell, ['--acc' as any]: accent }}
+      className={`font-sans ${isRtl ? 'rtl text-right' : ''}`}
+    >
       <style>{`.rla-btn-primary{background:${accent}}`}</style>
 
       {/* Navbar */}

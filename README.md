@@ -27,6 +27,7 @@ Paste a GitHub URL → get a beautiful, mobile-responsive developer landing page
 - **Pricing & Sponsorship Tiers** — modern 3-column tier table (Free/OSS, Backer/Sponsor with GitHub Sponsor link, Enterprise Support) with in-place editable pricing, features, and custom badges.
 - **Developer Testimonials & Social Proof** — quote cards with author, role, handle, and avatar badge to showcase user trust and momentum.
 - **Section toggles** — show/hide Showcase, Quickstart, Stars Chart, Releases, Tech Stack, Testimonials, Pricing, FAQ, Waitlist.
+- **AI Multi-Language Localization (i18n) & RTL Engine** — switch between 7 languages (English 🇺🇸, Persian 🇮🇷 with full RTL support, Spanish 🇪🇸, Chinese 🇨🇳, Japanese 🇯🇵, German 🇩🇪, French 🇫🇷). Includes instant offline templates plus 1-Click AI Translation via OpenAI/Gemini/Groq to localize all custom copy.
 - **1-Click In-Browser GitHub Pages Publisher** — publish your generated landing page directly to `gh-pages` branch via GitHub API straight from your browser with live URL feedback, no Git CLI or terminal required.
 - **Analytics & Tracking Code Injection** — effortlessly inject Google Analytics 4 (GA4), Plausible Analytics, or Umami directly into your exported landing pages via the Settings drawer.
 - **Export & Deploy engine**
