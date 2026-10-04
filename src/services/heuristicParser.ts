@@ -210,9 +210,15 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string, releas
   const eyebrow = meta.latestRelease?.tagName
     ? `Release ${meta.latestRelease.tagName}`
     : meta.topics?.[0] ? titleCase(meta.topics[0]) : (meta.language ? `${meta.language} project` : 'Open Source');
-  const headline = meta.description && meta.description.length < 90
+  let headline = meta.description && meta.description.length < 90
     ? meta.description
     : `${titleCase(meta.name)} — ${excerpt.split(/[.!?]/)[0].slice(0, 70)}`;
+  let subheadline = excerpt;
+
+  if (headline.trim().toLowerCase() === subheadline.trim().toLowerCase() || subheadline.trim().startsWith(headline.trim())) {
+    headline = titleCase(meta.name);
+    subheadline = meta.description || excerpt || `A modern open-source project from ${meta.owner}.`;
+  }
 
   let features = extractFeatures(md);
   if (features.length < 3) {
@@ -254,7 +260,7 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string, releas
     hero: {
       eyebrow,
       headline,
-      subheadline: excerpt,
+      subheadline,
       ctaPrimary: 'Get Started',
       ctaPrimaryLink: meta.homepage || meta.repoUrl,
       ctaSecondary: 'Star on GitHub',

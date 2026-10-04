@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe, Languages, Megaphone } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe, Languages, Megaphone, Layers } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -68,6 +68,7 @@ export default function Studio() {
   const [copiedLaunch, setCopiedLaunch] = useState(false);
   const [socialModalOpen, setSocialModalOpen] = useState(false);
   const [ogPreviewUrl, setOgPreviewUrl] = useState<string>('');
+  const [sectionsDockOpen, setSectionsDockOpen] = useState(false);
 
   const handleTranslateAI = async (lang: LanguageCode) => {
     setTranslating(true);
@@ -212,153 +213,167 @@ export default function Studio() {
   return (
     <div className="min-h-screen bg-[#08080d] text-zinc-100 font-sans">
       {/* Toolbar */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#08080d]/90 backdrop-blur">
-        <div className="max-w-[1600px] mx-auto flex items-center gap-3 px-4 py-3 flex-wrap">
-          <span className="font-extrabold tracking-tight text-lg mr-2">
-            <span className="text-indigo-400">◆</span> Repo<span className="text-indigo-400">Launch</span>
-          </span>
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#08080d]/95 backdrop-blur-md">
+        {/* Tier 1: Main Search & Action Bar */}
+        <div className="max-w-[1650px] mx-auto flex items-center justify-between gap-3 px-4 py-2.5 flex-wrap">
+          {/* Left: Logo & Ingestion Input */}
+          <div className="flex items-center gap-3 flex-1 min-w-[300px] max-w-2xl">
+            <span className="font-extrabold tracking-tight text-lg shrink-0 flex items-center gap-1">
+              <span className="text-indigo-400">◆</span> Repo<span className="text-indigo-400">Launch</span>
+            </span>
 
-          <div className="flex items-center gap-2 flex-1 min-w-[260px] max-w-xl">
-            <input
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 placeholder:text-zinc-500"
-              placeholder="github.com/owner/repo or owner/repo"
-              value={s.urlInput}
-              onChange={(e) => s.setUrlInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && s.generate(s.urlInput)}
-            />
-            <button
-              onClick={() => s.generate(s.urlInput)}
-              disabled={status === 'loading' || !s.urlInput.trim()}
-              className="bg-indigo-500 hover:bg-indigo-400 disabled:opacity-40 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
-            >
-              {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Generate'}
-            </button>
-          </div>
-
-          <select
-            className="bg-[#151524] text-zinc-100 border border-white/20 hover:border-indigo-400/60 rounded-lg px-3 py-2 text-sm font-medium transition cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/40 shadow-sm"
-            value=""
-            onChange={(e) => e.target.value && s.loadMock(e.target.value)}
-          >
-            <option value="" className="bg-[#151524] text-zinc-400">⚡ Try a demo preset…</option>
-            {Object.keys(MOCK_PRESETS).map((k) => (
-              <option key={k} value={k} className="bg-[#151524] text-zinc-100 font-semibold">{k}</option>
-            ))}
-          </select>
-
-          <div className="flex bg-[#12121e] border border-white/15 rounded-lg p-0.5">
-            {THEMES.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => s.setThemeId(t.id)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${s.theme.themeId === t.id ? 'bg-indigo-600 text-white shadow' : 'text-zinc-300 hover:text-white hover:bg-white/5'}`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Accent Color Palette */}
-          <div className="flex items-center gap-1.5 bg-[#151524] border border-white/20 rounded-lg px-2.5 py-1.5" title="Accent color">
-            {ACCENTS.map((a) => (
-              <button
-                key={a.color}
-                title={a.label}
-                onClick={() => s.setAccent(a.color)}
-                className={`w-4 h-4 rounded-full transition-all ${s.theme.accentColor === a.color ? 'scale-125 ring-2 ring-white shadow-lg' : 'opacity-70 hover:opacity-100 hover:scale-110'}`}
-                style={{ backgroundColor: a.color }}
+            <div className="flex items-center gap-1.5 flex-1 bg-white/5 border border-white/10 focus-within:border-indigo-400/60 rounded-xl px-2 py-1 transition">
+              <input
+                className="flex-1 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-zinc-500 text-zinc-100 min-w-0"
+                placeholder="github.com/owner/repo or owner/repo"
+                value={s.urlInput}
+                onChange={(e) => s.setUrlInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && s.generate(s.urlInput)}
               />
-            ))}
-          </div>
+              <button
+                onClick={() => s.generate(s.urlInput)}
+                disabled={status === 'loading' || !s.urlInput.trim()}
+                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition shrink-0"
+              >
+                {status === 'loading' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Generate'}
+              </button>
+            </div>
 
-          {/* Language Selector & i18n */}
-          <div className="flex items-center gap-1.5 bg-[#151524] border border-white/20 hover:border-indigo-400/50 rounded-lg px-2.5 py-1.5 transition shadow-sm" title="Landing page language">
-            <Languages className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <select
-              className="bg-transparent text-xs font-semibold text-zinc-100 outline-none cursor-pointer pr-1"
-              value={s.theme.language || 'en'}
-              onChange={(e) => s.setLanguage(e.target.value as LanguageCode)}
+              className="bg-[#151524] text-zinc-200 border border-white/15 hover:border-indigo-400/60 rounded-xl px-2.5 py-1.5 text-xs font-medium transition cursor-pointer outline-none focus:ring-1 focus:ring-indigo-500/50 shadow-sm shrink-0 hidden sm:block"
+              value=""
+              onChange={(e) => e.target.value && s.loadMock(e.target.value)}
             >
-              {SUPPORTED_LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code} className="bg-[#151524] text-zinc-100 font-medium">
-                  {l.flag} {l.nativeLabel} ({l.label})
-                </option>
+              <option value="" className="bg-[#151524] text-zinc-400">⚡ Demo Presets…</option>
+              {Object.keys(MOCK_PRESETS).map((k) => (
+                <option key={k} value={k} className="bg-[#151524] text-zinc-100 font-semibold">{k}</option>
               ))}
             </select>
-            {s.theme.language && s.theme.language !== 'en' && s.content && (
+          </div>
+
+          {/* Right: Primary Actions */}
+          <div className="flex items-center gap-2 shrink-0">
+            {s.meta && (
+              <>
+                <button
+                  onClick={() => setBadgeModalOpen(true)}
+                  title="Get README Badges & Markdown"
+                  className="flex items-center gap-1.5 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 text-xs font-medium px-2.5 py-1.5 rounded-lg transition"
+                >
+                  <Award className="w-3.5 h-3.5" /> <span className="hidden md:inline">Badges</span>
+                </button>
+
+                <button
+                  onClick={() => setLaunchModalOpen(true)}
+                  title="Viral Launch Kit: Twitter Thread, Show HN, Reddit, and Product Hunt pitch"
+                  className="flex items-center gap-1.5 border border-amber-400/40 text-amber-300 hover:bg-amber-400/10 text-xs font-medium px-2.5 py-1.5 rounded-lg transition"
+                >
+                  <Megaphone className="w-3.5 h-3.5 text-amber-400" /> <span className="hidden md:inline">Launch Kit</span>
+                </button>
+
+                <button
+                  onClick={doEnhance}
+                  disabled={aiBusy}
+                  title="Enhance copy with AI (BYOK)"
+                  className="flex items-center gap-1.5 border border-fuchsia-400/40 text-fuchsia-300 hover:bg-fuchsia-400/10 text-xs font-medium px-2.5 py-1.5 rounded-lg transition disabled:opacity-50"
+                >
+                  {aiBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />} <span className="hidden md:inline">AI</span>
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={() => s.setSettingsOpen(true)}
+              className="p-2 rounded-lg border border-white/15 text-zinc-400 hover:text-white hover:border-white/30 transition"
+              title="Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+
+            {s.meta && (
               <button
-                onClick={() => handleTranslateAI(s.theme.language!)}
-                disabled={translating}
-                title={`Translate full copy to ${SUPPORTED_LANGUAGES.find((l) => l.code === s.theme.language)?.label} using AI`}
-                className="text-xs bg-indigo-500/25 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/50 px-2 py-0.5 rounded flex items-center gap-1 transition disabled:opacity-50 ml-1 font-semibold"
+                onClick={() => setExportOpen(!exportOpen)}
+                className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition shadow-md shadow-emerald-500/20"
               >
-                {translating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-indigo-400" />}
-                <span className="hidden sm:inline">AI Translate</span>
+                <Download className="w-3.5 h-3.5" /> Export
               </button>
             )}
           </div>
-
-          <div className="flex bg-[#12121e] border border-white/15 rounded-lg p-0.5">
-            {DEVICES.map((d) => (
-              <button
-                key={d.id}
-                title={d.label}
-                onClick={() => s.setDevice(d.id)}
-                className={`p-1.5 rounded-md transition ${s.device === d.id ? 'bg-indigo-600 text-white' : 'text-zinc-400 hover:text-white'}`}
-              >
-                <d.icon className="w-4 h-4" />
-              </button>
-            ))}
-          </div>
-
-          {s.meta && (
-            <button
-              onClick={() => setBadgeModalOpen(true)}
-              title="Get README Badges & Markdown"
-              className="flex items-center gap-1.5 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 text-sm font-medium px-3 py-2 rounded-lg transition"
-            >
-              <Award className="w-4 h-4" /> Badges
-            </button>
-          )}
-
-          {s.meta && (
-            <button
-              onClick={() => setLaunchModalOpen(true)}
-              title="Viral Launch Kit: Twitter Thread, Show HN, Reddit, and Product Hunt pitch"
-              className="flex items-center gap-1.5 border border-amber-400/40 text-amber-300 hover:bg-amber-400/10 text-sm font-medium px-3 py-2 rounded-lg transition"
-            >
-              <Megaphone className="w-4 h-4 text-amber-400" /> Launch Kit
-            </button>
-          )}
-
-          {s.meta && (
-            <button
-              onClick={doEnhance}
-              disabled={aiBusy}
-              title="Enhance copy with AI (BYOK)"
-              className="flex items-center gap-1.5 border border-fuchsia-400/40 text-fuchsia-300 hover:bg-fuchsia-400/10 text-sm font-medium px-3 py-2 rounded-lg transition disabled:opacity-50"
-            >
-              {aiBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />} AI
-            </button>
-          )}
-
-          <button
-            onClick={() => s.setSettingsOpen(true)}
-            className="p-2 rounded-lg border border-white/10 text-zinc-400 hover:text-white hover:border-white/30 transition"
-            title="Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-
-          {s.meta && (
-            <button
-              onClick={() => setExportOpen(!exportOpen)}
-              className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
-            >
-              <Download className="w-4 h-4" /> Export
-            </button>
-          )}
         </div>
+
+        {/* Tier 2: Studio Design & View Controls Strip */}
+        {s.meta && s.content && (
+          <div className="border-t border-white/5 bg-[#0e0e18]/80 px-4 py-2 flex items-center justify-between gap-4 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Theme selector */}
+              <div className="flex bg-[#151524] border border-white/15 rounded-lg p-0.5">
+                {THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => s.setThemeId(t.id)}
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-md transition ${s.theme.themeId === t.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-zinc-300 hover:text-white hover:bg-white/5'}`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Accent Color Palette */}
+              <div className="flex items-center gap-1.5 bg-[#151524] border border-white/15 rounded-lg px-2 py-1" title="Accent color">
+                {ACCENTS.map((a) => (
+                  <button
+                    key={a.color}
+                    title={a.label}
+                    onClick={() => s.setAccent(a.color)}
+                    className={`w-3.5 h-3.5 rounded-full transition-all ${s.theme.accentColor === a.color ? 'scale-125 ring-2 ring-white shadow-md' : 'opacity-70 hover:opacity-100 hover:scale-110'}`}
+                    style={{ backgroundColor: a.color }}
+                  />
+                ))}
+              </div>
+
+              {/* Language Selector & i18n */}
+              <div className="flex items-center gap-1 bg-[#151524] border border-white/15 hover:border-indigo-400/50 rounded-lg px-2 py-1 transition shadow-sm" title="Landing page language">
+                <Languages className="w-3 h-3 text-indigo-400 shrink-0" />
+                <select
+                  className="bg-transparent text-xs font-semibold text-zinc-100 outline-none cursor-pointer pr-1"
+                  value={s.theme.language || 'en'}
+                  onChange={(e) => s.setLanguage(e.target.value as LanguageCode)}
+                >
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code} className="bg-[#151524] text-zinc-100 font-medium">
+                      {l.flag} {l.nativeLabel} ({l.label})
+                    </option>
+                  ))}
+                </select>
+                {s.theme.language && s.theme.language !== 'en' && s.content && (
+                  <button
+                    onClick={() => handleTranslateAI(s.theme.language!)}
+                    disabled={translating}
+                    title={`Translate full copy to ${SUPPORTED_LANGUAGES.find((l) => l.code === s.theme.language)?.label} using AI`}
+                    className="text-[11px] bg-indigo-500/25 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/50 px-1.5 py-0.5 rounded flex items-center gap-1 transition disabled:opacity-50 ml-1 font-semibold"
+                  >
+                    {translating ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Sparkles className="w-2.5 h-2.5 text-indigo-400" />}
+                    <span>AI Translate</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Device Switcher */}
+            <div className="flex bg-[#151524] border border-white/15 rounded-lg p-0.5 shrink-0">
+              {DEVICES.map((d) => (
+                <button
+                  key={d.id}
+                  title={d.label}
+                  onClick={() => s.setDevice(d.id)}
+                  className={`p-1.5 rounded-md transition ${s.device === d.id ? 'bg-indigo-600 text-white' : 'text-zinc-400 hover:text-white'}`}
+                >
+                  <d.icon className="w-3.5 h-3.5" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Export menu */}
         {exportOpen && s.meta && (
@@ -455,18 +470,44 @@ export default function Studio() {
         </div>
       )}
 
-      {/* Section toggles (floating) */}
+      {/* Section toggles (retractable dock) */}
       {s.content && (
-        <div className="fixed bottom-4 left-4 z-40 flex gap-2 flex-wrap max-w-2xl">
-          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
+        <div className="fixed bottom-4 left-4 z-40">
+          {sectionsDockOpen ? (
+            <div className="bg-[#10101c]/95 backdrop-blur-md border border-white/20 rounded-2xl p-3 shadow-2xl max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <div className="flex items-center justify-between gap-3 mb-2.5 pb-2 border-b border-white/10 text-xs">
+                <span className="font-semibold text-zinc-200 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-indigo-400" /> Page Sections
+                </span>
+                <button
+                  onClick={() => setSectionsDockOpen(false)}
+                  className="text-zinc-400 hover:text-white px-2 py-0.5 rounded-lg hover:bg-white/10 flex items-center gap-1 text-[11px] font-medium transition"
+                >
+                  <ChevronDown className="w-3.5 h-3.5" /> Collapse
+                </button>
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
+                  <button
+                    key={k}
+                    onClick={() => s.toggleSection(k)}
+                    className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition shadow-sm ${s.theme[k] ? 'bg-indigo-600/35 border-indigo-400 text-indigo-100 shadow-[0_0_12px_rgba(99,102,241,0.25)]' : 'bg-white/5 border-white/15 text-zinc-400 line-through hover:text-white'}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
             <button
-              key={k}
-              onClick={() => s.toggleSection(k)}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur transition shadow-sm ${s.theme[k] ? 'bg-indigo-600/30 border-indigo-400 text-indigo-100 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'bg-[#151522]/90 border-white/20 text-zinc-300 line-through hover:text-white hover:border-white/40'}`}
+              onClick={() => setSectionsDockOpen(true)}
+              className="flex items-center gap-2 bg-[#12121e]/90 hover:bg-[#181828] border border-white/20 hover:border-indigo-400/50 backdrop-blur-md text-xs font-semibold px-3.5 py-2 rounded-xl text-zinc-200 shadow-xl transition"
             >
-              {label}
+              <Layers className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Sections</span>
+              <ChevronUp className="w-3.5 h-3.5 opacity-60" />
             </button>
-          ))}
+          )}
         </div>
       )}
 
@@ -852,28 +893,28 @@ ${s.meta.latestRelease ? `[![Release](https://img.shields.io/github/v/release/${
               </p>
 
               {/* Tabs */}
-              <div className="flex gap-1.5 p-1 bg-white/5 border border-white/10 rounded-xl mb-4 overflow-x-auto text-xs">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 bg-[#151522] border border-white/15 rounded-xl mb-4 shrink-0">
                 <button
                   onClick={() => setLaunchTab('twitter')}
-                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'twitter' ? 'bg-indigo-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${launchTab === 'twitter' ? 'bg-indigo-600 text-white shadow-md' : 'bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10'}`}
                 >
-                  𝕏 / Twitter Thread (4)
+                  𝕏 Twitter (4)
                 </button>
                 <button
                   onClick={() => setLaunchTab('hn')}
-                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'hn' ? 'bg-amber-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${launchTab === 'hn' ? 'bg-amber-600 text-white shadow-md' : 'bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10'}`}
                 >
                   Hacker News
                 </button>
                 <button
                   onClick={() => setLaunchTab('reddit')}
-                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'reddit' ? 'bg-rose-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${launchTab === 'reddit' ? 'bg-rose-600 text-white shadow-md' : 'bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10'}`}
                 >
                   Reddit
                 </button>
                 <button
                   onClick={() => setLaunchTab('ph')}
-                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'ph' ? 'bg-emerald-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                  className={`py-2 px-3 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${launchTab === 'ph' ? 'bg-emerald-600 text-white shadow-md' : 'bg-white/5 text-zinc-300 hover:text-white hover:bg-white/10'}`}
                 >
                   Product Hunt
                 </button>

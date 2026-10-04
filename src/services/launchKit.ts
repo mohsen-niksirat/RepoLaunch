@@ -27,10 +27,14 @@ export function generateLaunchKit(meta: RepoMetadata, content: LandingPageConten
   const subheadline = content.hero.subheadline;
   const topFeatures = content.features.slice(0, 4);
 
+  const summary = (headline.trim().toLowerCase() === subheadline.trim().toLowerCase() || subheadline.toLowerCase().includes(headline.toLowerCase()))
+    ? subheadline
+    : `${headline} — ${subheadline}`;
+
   // 1. Twitter / X Launch Thread
   const tweet1 = `🚀 Excited to open-source ${name}!
 
-${headline} — ${subheadline}
+${summary}
 
 ⭐ Star the repo: ${repoUrl}
 🌐 Live site: ${homepage}
@@ -41,7 +45,7 @@ Here's why we built it and what makes it special 🧵👇`;
 Many tools in this space are either too heavy, complex to configure, or lack modern DX.
 
 With ${name}, we focused on:
-${topFeatures.map((f, i) => `${i + 1}️⃣ ${f.title} — ${f.desc.slice(0, 90)}`).join('\n')}`;
+${topFeatures.map((f, i) => `${i + 1}️⃣ ${f.title}${f.desc && f.desc.trim().toLowerCase() !== f.title.trim().toLowerCase() ? ` — ${f.desc.slice(0, 90)}` : ''}`).join('\n')}`;
 
   const tweet3 = `⚡ Get started in seconds:
 ${content.quickstart[0]?.command ? `\`\`\`bash\n${content.quickstart[0].command}\n\`\`\`` : `Clone & run immediately without bloat.`}
