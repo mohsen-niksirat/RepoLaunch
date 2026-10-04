@@ -24,6 +24,9 @@ const LUCIDE_PATHS: Record<string, string> = {
   Terminal: '<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
   Github: '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
   ArrowRight: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  Check: '<polyline points="20 6 9 17 4 12"/>',
+  Heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  Quote: '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>',
 };
 
 function iconSvg(name: string, cls: string): string {
@@ -270,6 +273,60 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   </section>`
     : '';
 
+  const testimonialsSection = theme.showTestimonials !== false && content.testimonials && content.testimonials.items?.length
+    ? `<section class="container px-6 py-16">
+    <div style="text-align:center;margin-bottom:40px">
+      <h2 class="section-title" style="margin-bottom:8px">${esc(content.testimonials.heading)}</h2>
+      <p style="font-size:14px;color:var(--muted);max-width:540px;margin:0 auto">${esc(content.testimonials.description)}</p>
+    </div>
+    <div class="grid">${content.testimonials.items.map((item) => `
+      <div class="rl-card p-6" style="display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="margin-bottom:12px;opacity:0.6;color:var(--accent)">${iconSvg('Quote', 'w-6 h-6')}</div>
+          <p style="font-size:14px;line-height:1.6;font-style:italic;margin-bottom:20px">${esc(item.quote)}</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;text-transform:uppercase">
+            ${esc(item.author.split(' ').map((n: string) => n[0]).join('').slice(0, 2))}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:14px">${esc(item.author)}</div>
+            <div style="font-size:12px;color:var(--muted)">${esc(item.role)}${item.handle ? ` <span style="opacity:0.7">${esc(item.handle)}</span>` : ''}</div>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </section>`
+    : '';
+
+  const pricingSection = theme.showPricing !== false && content.pricing && content.pricing.tiers?.length
+    ? `<section class="container px-6 py-16">
+    <div style="text-align:center;margin-bottom:40px">
+      <h2 class="section-title" style="margin-bottom:8px">${esc(content.pricing.heading)}</h2>
+      <p style="font-size:14px;color:var(--muted);max-width:540px;margin:0 auto">${esc(content.pricing.description)}</p>
+    </div>
+    <div class="grid" style="align-items:stretch">${content.pricing.tiers.map((tier) => `
+      <div class="rl-card p-6" style="display:flex;flex-direction:column;justify-content:space-between;position:relative;${tier.popular ? 'border-color:var(--accent);box-shadow:0 0 25px rgba(129,140,248,0.2)' : ''}">
+        ${tier.popular ? `<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0a0a12;font-size:10px;font-weight:700;text-transform:uppercase;padding:3px 12px;border-radius:999px;letter-spacing:0.05em">${esc(tier.badge || 'Most Popular')}</div>` : ''}
+        <div>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">${esc(tier.name)}</h3>
+          <div style="display:flex;align-items:baseline;gap:4px;margin:16px 0">
+            <span style="font-size:36px;font-weight:800;letter-spacing:-0.03em">${esc(tier.price)}</span>
+            ${tier.period ? `<span style="font-size:13px;color:var(--muted)">${esc(tier.period)}</span>` : ''}
+          </div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px">${esc(tier.description)}</p>
+          <ul style="list-style:none;padding:0;margin:0 0 28px 0;display:flex;flex-direction:column;gap:10px">
+            ${tier.features.map((feat) => `<li style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><span style="color:var(--accent);flex-shrink:0;margin-top:2px">${iconSvg('Check', 'w-3.5 h-3.5')}</span><span>${esc(feat)}</span></li>`).join('')}
+          </ul>
+        </div>
+        <a class="btn ${tier.popular ? 'rl-btn-primary' : 'rl-btn-ghost'}" href="${esc(tier.ctaLink)}" target="_blank" rel="noopener" style="width:100%;text-align:center;justify-content:center">
+          ${tier.ctaText.toLowerCase().includes('sponsor') ? iconSvg('Heart', 'w-4 h-4') + ' ' : ''}${esc(tier.ctaText)} ${iconSvg('ArrowRight', 'w-3.5 h-3.5')}
+        </a>
+      </div>`).join('')}
+    </div>
+  </section>`
+    : '';
+
   const sectionMap: Record<string, string> = {
     showcase: screenshotsSection,
     features: `<section class="container px-6 py-16"><h2 class="section-title">Why ${esc(meta.name)}?</h2><div class="grid">${features}</div></section>`,
@@ -278,13 +335,15 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     starHistory: starHistorySection,
     changelog: changelogSection,
     techStack: techSection,
+    testimonials: testimonialsSection,
+    pricing: pricingSection,
     faq: faqSection,
     newsletter: newsletterSection,
   };
 
   const order = theme.sectionOrder && theme.sectionOrder.length
     ? theme.sectionOrder
-    : ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'];
+    : ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];
 
   const renderedSections = order.map((k) => sectionMap[k] || '').filter(Boolean).join('\n\n');
 
@@ -490,6 +549,76 @@ export default function LandingPage() {
               <button onClick={copyCmd} className="text-xs px-2 py-1 rounded-md text-zinc-400 hover:text-white">{copied ? 'Copied!' : 'Copy'}</button>
             </div>
             <pre className="px-5 pb-5 pt-3 overflow-x-auto text-zinc-200">{content.quickstart[tab]?.command}</pre>
+          </div>
+        </section>
+      )}
+
+      {DATA.theme.showTestimonials !== false && content.testimonials && (
+        <section className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3">{content.testimonials.heading}</h2>
+            <p className="text-sm text-zinc-400 max-w-xl mx-auto">{content.testimonials.description}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {content.testimonials.items.map((item, i) => (
+              <div key={i} className="p-6 rounded-2xl border border-white/10 bg-white/5 flex flex-col justify-between">
+                <div>
+                  <div className="mb-3 opacity-60" style={{ color: theme.accentColor }}>
+                    <Icon name="Quote" className="w-6 h-6" />
+                  </div>
+                  <p className="text-sm text-zinc-300 italic mb-6 leading-relaxed">{item.quote}</p>
+                </div>
+                <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs uppercase">
+                    {item.author.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm">{item.author}</h4>
+                    <p className="text-xs text-zinc-500">{item.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {DATA.theme.showPricing !== false && content.pricing && (
+        <section className="max-w-5xl mx-auto px-6 py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3">{content.pricing.heading}</h2>
+            <p className="text-sm text-zinc-400 max-w-xl mx-auto">{content.pricing.description}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 items-stretch">
+            {content.pricing.tiers.map((tier, i) => (
+              <div key={i} className={'relative p-6 rounded-2xl border bg-white/5 flex flex-col justify-between ' + (tier.popular ? 'border-indigo-500 ring-2 ring-indigo-500/50' : 'border-white/10')}>
+                {tier.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full text-zinc-950" style={{ background: theme.accentColor }}>
+                      {tier.badge || 'Popular'}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-bold text-lg mb-1">{tier.name}</h3>
+                  <div className="flex items-baseline gap-1 my-3">
+                    <span className="text-3xl font-extrabold">{tier.price}</span>
+                    {tier.period && <span className="text-xs text-zinc-500">{tier.period}</span>}
+                  </div>
+                  <p className="text-xs text-zinc-400 mb-6">{tier.description}</p>
+                  <ul className="space-y-2 mb-8 text-xs text-zinc-300">
+                    {tier.features.map((feat, fIdx) => (
+                      <li key={fIdx} className="flex items-center gap-2">
+                        <Icon name="Check" className="w-3.5 h-3.5" style={{ color: theme.accentColor }} /> {feat}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <a href={tier.ctaLink} target="_blank" rel="noreferrer" className={'w-full py-2.5 rounded-xl font-semibold text-xs text-center inline-flex items-center justify-center gap-1.5 transition ' + (tier.popular ? 'text-zinc-950 font-bold' : 'border border-white/15 hover:border-white/40')} style={tier.popular ? { background: theme.accentColor } : undefined}>
+                  {tier.ctaText}
+                </a>
+              </div>
+            ))}
           </div>
         </section>
       )}

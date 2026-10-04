@@ -32,7 +32,7 @@ interface StudioState {
   setAIConfig: (c: AIConfig) => void;
   setThemeId: (t: ThemeId) => void;
   setAccent: (c: string) => void;
-  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory') => void;
+  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
   setAnalytics: (analytics?: import('../types').AnalyticsConfig) => void;
   moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
@@ -70,8 +70,10 @@ export const useStudio = create<StudioState>()(
         showNewsletter: true,
         showChangelog: true,
         showStarHistory: true,
+        showPricing: true,
+        showTestimonials: true,
         newsletterEndpoint: '',
-        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'],
+        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'],
       },
       device: 'desktop',
       settingsOpen: false,
@@ -90,7 +92,7 @@ export const useStudio = create<StudioState>()(
       setAnalytics: (analytics) => set((s) => ({ theme: { ...s.theme, analytics } })),
       moveSection: (id, direction) => {
         set((state) => {
-          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'];
+          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];
           const order = [...currentOrder];
           const idx = order.indexOf(id);
           if (idx === -1) return state;

@@ -372,8 +372,8 @@ export default function Studio() {
 
       {/* Section toggles (floating) */}
       {s.content && (
-        <div className="fixed bottom-4 left-4 z-40 flex gap-2">
-          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
+        <div className="fixed bottom-4 left-4 z-40 flex gap-2 flex-wrap max-w-2xl">
+          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
             <button
               key={k}
               onClick={() => s.toggleSection(k)}
@@ -461,7 +461,7 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
             <p className="text-xs text-zinc-500 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
             <div className="space-y-1.5 mb-6">
-              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
+              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
                 const labels: Record<SectionId, string> = {
                   showcase: 'Screenshot / Showcase',
                   features: 'Key Features Grid',
@@ -470,6 +470,8 @@ export default function Studio() {
                   starHistory: 'Star Velocity & Growth Chart',
                   changelog: 'Recent Releases & Changelog',
                   techStack: 'Tech Stack & Ecosystem',
+                  testimonials: 'Testimonials & Social Proof',
+                  pricing: 'Pricing / GitHub Sponsors',
                   faq: 'Frequently Asked Questions',
                   newsletter: 'Waitlist / Lead Capture Form',
                 };

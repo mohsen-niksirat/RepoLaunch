@@ -289,5 +289,79 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string, releas
     },
     changelog,
     starHistory,
+    testimonials: {
+      heading: 'Loved by developers worldwide',
+      description: `See how teams and open-source contributors build faster with ${titleCase(meta.name)}.`,
+      items: [
+        {
+          quote: `${titleCase(meta.name)} saved our engineering team countless hours. The architecture is clean, reliable, and intuitive.`,
+          author: 'Alex Rivera',
+          role: 'Principal Engineer',
+          handle: '@alexrivera',
+        },
+        {
+          quote: `Hands down one of the most well-crafted open-source tools I've adopted this year. The documentation and DX are top-tier.`,
+          author: 'Sarah Chen',
+          role: 'Full Stack Tech Lead',
+          handle: '@sarahc_dev',
+        },
+        {
+          quote: `Extremely performant and seamless to integrate into production CI/CD pipelines. It worked right out of the box.`,
+          author: 'Marcus Vance',
+          role: 'DevOps Architect',
+          handle: '@mvance',
+        },
+      ],
+    },
+    pricing: {
+      heading: 'Simple, transparent sponsorship & plans',
+      description: 'Choose the tier that matches your scale — support open-source development or get dedicated enterprise advisory.',
+      tiers: [
+        {
+          name: 'Community',
+          price: '$0',
+          period: 'forever',
+          description: 'Everything you need to build, test, and ship.',
+          features: [
+            '100% Free & Open Source',
+            'Full source code access',
+            'Community discussions & issue tracker',
+            'Permissive Open Source License',
+          ],
+          ctaText: 'Get Started',
+          ctaLink: meta.repoUrl,
+        },
+        {
+          name: 'Backer / Sponsor',
+          price: '$5',
+          period: '/month',
+          popular: true,
+          badge: 'Most Popular',
+          description: 'Directly support maintainers and unlock community perks.',
+          features: [
+            'Priority issue & bug triaging',
+            'Sponsor badge on README & website',
+            'Early access to release notes & previews',
+            'Private Discord / discussions channel',
+          ],
+          ctaText: 'Sponsor on GitHub',
+          ctaLink: `https://github.com/sponsors/${meta.owner}`,
+        },
+        {
+          name: 'Enterprise Support',
+          price: '$99',
+          period: '/month',
+          description: 'Dedicated support, architectural reviews, and SLA guarantees.',
+          features: [
+            'Direct 1-on-1 architectural review',
+            'Custom feature prioritization',
+            'Enterprise security & license compliance',
+            'Dedicated 24h SLA response time',
+          ],
+          ctaText: 'Contact Maintainers',
+          ctaLink: `${meta.repoUrl}/issues`,
+        },
+      ],
+    },
   };
 }

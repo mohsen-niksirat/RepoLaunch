@@ -79,6 +79,38 @@ export interface StarPoint {
   stars: number;
 }
 
+export interface PricingTier {
+  name: string;
+  price: string;
+  period?: string;
+  description: string;
+  features: string[];
+  ctaText: string;
+  ctaLink: string;
+  popular?: boolean;
+  badge?: string;
+}
+
+export interface PricingContent {
+  heading: string;
+  description: string;
+  tiers: PricingTier[];
+}
+
+export interface TestimonialItem {
+  quote: string;
+  author: string;
+  role: string;
+  handle?: string;
+  avatar?: string;
+}
+
+export interface TestimonialsContent {
+  heading: string;
+  description: string;
+  items: TestimonialItem[];
+}
+
 export interface LandingPageContent {
   hero: HeroContent;
   features: FeatureItem[];
@@ -96,11 +128,24 @@ export interface LandingPageContent {
   };
   changelog?: ReleaseItem[];
   starHistory?: StarPoint[];
+  pricing?: PricingContent;
+  testimonials?: TestimonialsContent;
 }
 
 export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal';
 
-export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq' | 'newsletter' | 'starHistory' | 'changelog';
+export type SectionId =
+  | 'showcase'
+  | 'features'
+  | 'howItWorks'
+  | 'quickstart'
+  | 'starHistory'
+  | 'changelog'
+  | 'techStack'
+  | 'testimonials'
+  | 'pricing'
+  | 'faq'
+  | 'newsletter';
 
 export interface AnalyticsConfig {
   provider: 'ga4' | 'plausible' | 'umami';
@@ -118,6 +163,8 @@ export interface ThemeConfig {
   showNewsletter?: boolean;
   showChangelog?: boolean;
   showStarHistory?: boolean;
+  showPricing?: boolean;
+  showTestimonials?: boolean;
   newsletterEndpoint?: string;
   analytics?: AnalyticsConfig;
   sectionOrder: SectionId[];

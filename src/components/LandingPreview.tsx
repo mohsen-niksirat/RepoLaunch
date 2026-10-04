@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Zap, ShieldCheck, Rocket, Layers, Gauge, Globe, Plug, Boxes, Sparkles, Wrench,
-  Copy, Star, ChevronDown, Github, ArrowRight, Check,
+  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart,
 } from 'lucide-react';
 import type { LandingPageContent, RepoMetadata, ThemeConfig } from '../types';
 import { renderStarHistorySvg } from '../services/starHistory';
@@ -334,6 +334,121 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                 {content.techStack.map((t, i) => (
                   <span key={i} className={`px-3 py-1 text-xs font-medium ${cardCls}`}>{t.label}</span>
                 ))}
+              </div>
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'testimonials') {
+          return theme.showTestimonials !== false && content.testimonials && content.testimonials.items?.length > 0 ? (
+            <section key="testimonials" className="max-w-5xl mx-auto px-6 py-16">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-extrabold tracking-tight mb-3">
+                  <Editable value={content.testimonials.heading} path="testimonials.heading" onEdit={onEdit} />
+                </h2>
+                <p className={`text-sm max-w-xl mx-auto ${muted}`}>
+                  <Editable value={content.testimonials.description} path="testimonials.description" onEdit={onEdit} as="span" />
+                </p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                {content.testimonials.items.map((item, i) => (
+                  <div key={i} className={`p-6 flex flex-col justify-between ${cardCls}`}>
+                    <div>
+                      <Quote className={`w-6 h-6 mb-4 opacity-50 ${isTerminal ? 'text-green-400' : ''}`} style={!isTerminal ? { color: accent } : undefined} />
+                      <p className={`text-sm leading-relaxed mb-6 italic ${isTerminal ? 'text-green-300' : isBrutal ? 'text-black' : isMidnight ? 'text-zinc-200' : 'text-gray-700'}`}>
+                        <Editable value={item.quote} path={`testimonials.items.${i}.quote`} onEdit={onEdit} as="span" />
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs uppercase ${isTerminal ? 'bg-green-500/20 text-green-300 border border-green-700' : isBrutal ? 'bg-black text-white' : 'bg-white/10 text-white'}`}>
+                        {item.author.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm leading-tight">
+                          <Editable value={item.author} path={`testimonials.items.${i}.author`} onEdit={onEdit} />
+                        </h4>
+                        <p className={`text-xs ${muted}`}>
+                          <Editable value={item.role} path={`testimonials.items.${i}.role`} onEdit={onEdit} />
+                          {item.handle && <span className="ml-1 opacity-70">{item.handle}</span>}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'pricing') {
+          return theme.showPricing !== false && content.pricing && content.pricing.tiers?.length > 0 ? (
+            <section key="pricing" className="max-w-5xl mx-auto px-6 py-16">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-extrabold tracking-tight mb-3">
+                  <Editable value={content.pricing.heading} path="pricing.heading" onEdit={onEdit} />
+                </h2>
+                <p className={`text-sm max-w-xl mx-auto ${muted}`}>
+                  <Editable value={content.pricing.description} path="pricing.description" onEdit={onEdit} as="span" />
+                </p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6 items-stretch">
+                {content.pricing.tiers.map((tier, i) => {
+                  const isPopular = tier.popular;
+                  return (
+                    <div
+                      key={i}
+                      className={`relative p-6 md:p-8 flex flex-col justify-between ${cardCls} ${isPopular ? (isBrutal ? 'ring-2 ring-black shadow-[8px_8px_0_var(--acc)]' : isTerminal ? 'ring-1 ring-green-400 shadow-[0_0_30px_rgba(34,197,94,0.3)]' : isMidnight ? 'ring-2 ring-indigo-500/60 shadow-[0_0_30px_rgba(99,102,241,0.2)]' : 'ring-2 ring-indigo-600 shadow-xl') : ''}`}
+                      style={isBrutal && isPopular ? { ['--acc' as any]: accent } : undefined}
+                    >
+                      {isPopular && (
+                        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                          <span className={`text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full ${isBrutal ? 'bg-black text-white border-2 border-black' : isTerminal ? 'bg-green-500 text-black font-mono font-bold' : 'text-white'}`} style={!isBrutal && !isTerminal ? { background: accent } : undefined}>
+                            {tier.badge || 'Most Popular'}
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-lg">
+                            <Editable value={tier.name} path={`pricing.tiers.${i}.name`} onEdit={onEdit} />
+                          </h3>
+                        </div>
+                        <div className="flex items-baseline gap-1 my-4">
+                          <span className="text-4xl font-extrabold tracking-tight">
+                            <Editable value={tier.price} path={`pricing.tiers.${i}.price`} onEdit={onEdit} />
+                          </span>
+                          {tier.period && (
+                            <span className={`text-xs ${muted}`}>
+                              <Editable value={tier.period} path={`pricing.tiers.${i}.period`} onEdit={onEdit} />
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-xs mb-6 leading-relaxed ${muted}`}>
+                          <Editable value={tier.description} path={`pricing.tiers.${i}.description`} onEdit={onEdit} as="span" />
+                        </p>
+                        <ul className="space-y-2.5 mb-8">
+                          {tier.features.map((feat, fIdx) => (
+                            <li key={fIdx} className="flex items-start gap-2 text-xs">
+                              <Check className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${isTerminal ? 'text-green-400' : ''}`} style={!isTerminal ? { color: accent } : undefined} />
+                              <Editable value={feat} path={`pricing.tiers.${i}.features.${fIdx}`} onEdit={onEdit} as="span" />
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <a
+                        href={tier.ctaLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`w-full py-2.5 rounded-xl font-semibold text-xs text-center inline-flex items-center justify-center gap-1.5 transition ${isPopular ? btnPrimary : btnGhost}`}
+                        style={isPopular && isMidnight ? { background: accent, color: '#0a0a12' } : undefined}
+                      >
+                        {tier.ctaText.toLowerCase().includes('sponsor') && <Heart className="w-3.5 h-3.5 fill-current" />}
+                        <Editable value={tier.ctaText} path={`pricing.tiers.${i}.ctaText`} onEdit={onEdit} />
+                        <ArrowRight className="w-3 h-3 ml-1" />
+                      </a>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           ) : null;
