@@ -188,6 +188,7 @@ export interface ThemeConfig {
   showTestimonials?: boolean;
   newsletterEndpoint?: string;
   analytics?: AnalyticsConfig;
+  customDomain?: string;
   sectionOrder: SectionId[];
 }
 

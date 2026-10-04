@@ -4,9 +4,63 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #09090f;
+  color: #f3f4f6;
+}
+
+/* ─── Universal High-Contrast Select & Options for Dark Mode ─── */
+select {
+  color-scheme: dark;
+  background-color: #151522;
+  color: #f3f4f6;
+}
+
+select option {
+  background-color: #151522 !important;
+  color: #f9fafb !important;
+  font-weight: 500;
+  padding: 8px 12px;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+/* ─── Modern Developer Studio Scrollbars ─── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 15, 25, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* ─── Studio Glassmorphism & Glow Accents ─── */
+.studio-glass {
+  background: rgba(14, 14, 22, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.studio-glow {
+  box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
 }

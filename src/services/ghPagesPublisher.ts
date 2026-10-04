@@ -36,7 +36,8 @@ export async function publishToGitHubPages(
   html: string,
   token: string,
   ogBlob?: Blob,
-  onProgress?: (msg: string) => void
+  onProgress?: (msg: string) => void,
+  customDomain?: string
 ): Promise<PublishResult> {
   if (!token) {
     throw new Error('A GitHub Personal Access Token with "repo" scope is required to publish directly.');
@@ -149,7 +150,32 @@ export async function publishToGitHubPages(
     }
   }
 
-  // 4. Activate or verify GitHub Pages site
+  // 4. Upload CNAME if custom domain provided
+  if (customDomain?.trim()) {
+    onProgress?.(`Configuring custom domain (${customDomain.trim()})…`);
+    try {
+      let existingCnameSha = '';
+      const cnameRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/CNAME?ref=${branch}`, { headers });
+      if (cnameRes.ok) {
+        const cnameData = await cnameRes.json();
+        existingCnameSha = cnameData.sha || '';
+      }
+      await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/CNAME`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          message: `chore: configure custom domain ${customDomain.trim()}`,
+          content: utf8ToBase64(customDomain.trim()),
+          branch,
+          ...(existingCnameSha ? { sha: existingCnameSha } : {}),
+        }),
+      });
+    } catch {
+      // optional
+    }
+  }
+
+  // 5. Activate or verify GitHub Pages site
   onProgress?.('Enabling and configuring GitHub Pages…');
   try {
     await fetch(`https://api.github.com/repos/${owner}/${repo}/pages`, {

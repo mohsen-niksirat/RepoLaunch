@@ -38,6 +38,7 @@ interface StudioState {
   toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
   setAnalytics: (analytics?: import('../types').AnalyticsConfig) => void;
+  setCustomDomain: (domain: string) => void;
   moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
   generate: (url: string) => Promise<void>;
   loadMock: (key: string) => void;
@@ -122,6 +123,7 @@ export const useStudio = create<StudioState>()(
       toggleSection: (k) => set((s) => ({ theme: { ...s.theme, [k]: !s.theme[k] } })),
       setNewsletterEndpoint: (endpoint) => set((s) => ({ theme: { ...s.theme, newsletterEndpoint: endpoint } })),
       setAnalytics: (analytics) => set((s) => ({ theme: { ...s.theme, analytics } })),
+      setCustomDomain: (domain) => set((s) => ({ theme: { ...s.theme, customDomain: domain } })),
       moveSection: (id, direction) => {
         set((state) => {
           const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];

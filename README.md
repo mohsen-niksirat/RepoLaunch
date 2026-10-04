@@ -29,6 +29,10 @@ Paste a GitHub URL → get a beautiful, mobile-responsive developer landing page
 - **Section toggles** — show/hide Showcase, Quickstart, Stars Chart, Releases, Tech Stack, Testimonials, Pricing, FAQ, Waitlist.
 - **AI Multi-Language Localization (i18n) & RTL Engine** — switch between 7 languages (English 🇺🇸, Persian 🇮🇷 with full RTL support, Spanish 🇪🇸, Chinese 🇨🇳, Japanese 🇯🇵, German 🇩🇪, French 🇫🇷). Includes instant offline templates plus 1-Click AI Translation via OpenAI/Gemini/Groq to localize all custom copy.
 - **1-Click In-Browser GitHub Pages Publisher** — publish your generated landing page directly to `gh-pages` branch via GitHub API straight from your browser with live URL feedback, no Git CLI or terminal required.
+- **Viral Launch Announcement Kit** — 1-click modal generating copy tailored for 𝕏/Twitter threads, Hacker News Show HN submissions, Reddit community posts, and Product Hunt maker announcements.
+- **Custom Domain (CNAME) & Live DNS Routing** — effortlessly bind your custom domain (`app.yourdomain.com`). RepoLaunch automatically writes CNAME records into GitHub Pages branches and ZIP export bundles, with step-by-step DNS guides.
+- **Live Social Card (OG Image) Inspector** — preview your dynamic 1200×630px Open Graph card in real time within authentic social media mockups before exporting or deploying.
+- **High-Contrast Dark Mode & Studio Polish** — optimized select dropdowns, inputs, and section controls for 100% legibility in dark environments with custom scrollbars and backdrop blur.
 - **Analytics & Tracking Code Injection** — effortlessly inject Google Analytics 4 (GA4), Plausible Analytics, or Umami directly into your exported landing pages via the Settings drawer.
 - **Export & Deploy engine**
   - Standalone `index.html` (self-contained with OpenGraph & Schema.org tags, open it or deploy instantly)

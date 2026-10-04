@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe, Languages } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check, Globe, Languages, Megaphone } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -8,6 +8,7 @@ import { generateStandaloneHTML, generateReactComponent, generateDeployReadme } 
 import { enhanceWithAI } from '../services/aiGenerator';
 import { generateOgImageBlob } from '../services/ogGenerator';
 import { publishToGitHubPages } from '../services/ghPagesPublisher';
+import { generateLaunchKit } from '../services/launchKit';
 import { MOCK_PRESETS } from '../services/github';
 import type { ThemeId, SectionId, LanguageCode } from '../types';
 import { SUPPORTED_LANGUAGES } from '../types';
@@ -62,6 +63,11 @@ export default function Studio() {
   const [publishError, setPublishError] = useState('');
   const [copiedPublishUrl, setCopiedPublishUrl] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [launchModalOpen, setLaunchModalOpen] = useState(false);
+  const [launchTab, setLaunchTab] = useState<'twitter' | 'hn' | 'reddit' | 'ph'>('twitter');
+  const [copiedLaunch, setCopiedLaunch] = useState(false);
+  const [socialModalOpen, setSocialModalOpen] = useState(false);
+  const [ogPreviewUrl, setOgPreviewUrl] = useState<string>('');
 
   const handleTranslateAI = async (lang: LanguageCode) => {
     setTranslating(true);
@@ -72,6 +78,18 @@ export default function Studio() {
       // handled in store
     } finally {
       setTranslating(false);
+    }
+  };
+
+  const openSocialPreview = async () => {
+    if (!s.meta || !s.content) return;
+    try {
+      const blob = await generateOgImageBlob(s.meta, s.content, s.theme);
+      const url = URL.createObjectURL(blob);
+      setOgPreviewUrl(url);
+      setSocialModalOpen(true);
+    } catch (e: any) {
+      alert('Failed to generate preview: ' + e?.message);
     }
   };
 
@@ -92,7 +110,14 @@ export default function Studio() {
       } catch {
         // optional
       }
-      const res = await publishToGitHubPages(s.meta, html, s.githubToken, ogBlob, (step) => setPublishStep(step));
+      const res = await publishToGitHubPages(
+        s.meta,
+        html,
+        s.githubToken,
+        ogBlob,
+        (step) => setPublishStep(step),
+        s.theme.customDomain
+      );
       setPublishUrl(res.url);
       celebrate();
     } catch (e: any) {
@@ -167,7 +192,10 @@ export default function Studio() {
     const zip = new JSZip();
     zip.file('index.html', generateStandaloneHTML(s.meta, s.content, s.theme));
     zip.file('LandingPage.tsx', generateReactComponent(s.meta, s.content, s.theme));
-    zip.file('README.md', generateDeployReadme(s.meta));
+    zip.file('README.md', generateDeployReadme(s.meta, s.theme.customDomain));
+    if (s.theme.customDomain?.trim()) {
+      zip.file('CNAME', s.theme.customDomain.trim());
+    }
     try {
       const ogBlob = await generateOgImageBlob(s.meta, s.content, s.theme);
       zip.file('og-image.png', ogBlob);
@@ -208,22 +236,22 @@ export default function Studio() {
           </div>
 
           <select
-            className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-2 text-sm"
+            className="bg-[#151524] text-zinc-100 border border-white/20 hover:border-indigo-400/60 rounded-lg px-3 py-2 text-sm font-medium transition cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/40 shadow-sm"
             value=""
             onChange={(e) => e.target.value && s.loadMock(e.target.value)}
           >
-            <option value="">Try a demo…</option>
+            <option value="" className="bg-[#151524] text-zinc-400">⚡ Try a demo preset…</option>
             {Object.keys(MOCK_PRESETS).map((k) => (
-              <option key={k} value={k}>{k}</option>
+              <option key={k} value={k} className="bg-[#151524] text-zinc-100 font-semibold">{k}</option>
             ))}
           </select>
 
-          <div className="flex bg-white/5 border border-white/10 rounded-lg p-0.5">
+          <div className="flex bg-[#12121e] border border-white/15 rounded-lg p-0.5">
             {THEMES.map((t) => (
               <button
                 key={t.id}
                 onClick={() => s.setThemeId(t.id)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition ${s.theme.themeId === t.id ? 'bg-indigo-500 text-white' : 'text-zinc-400 hover:text-white'}`}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${s.theme.themeId === t.id ? 'bg-indigo-600 text-white shadow' : 'text-zinc-300 hover:text-white hover:bg-white/5'}`}
               >
                 {t.label}
               </button>
@@ -231,7 +259,7 @@ export default function Studio() {
           </div>
 
           {/* Accent Color Palette */}
-          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-1.5" title="Accent color">
+          <div className="flex items-center gap-1.5 bg-[#151524] border border-white/20 rounded-lg px-2.5 py-1.5" title="Accent color">
             {ACCENTS.map((a) => (
               <button
                 key={a.color}
@@ -244,16 +272,16 @@ export default function Studio() {
           </div>
 
           {/* Language Selector & i18n */}
-          <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-1" title="Landing page language">
-            <Languages className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+          <div className="flex items-center gap-1.5 bg-[#151524] border border-white/20 hover:border-indigo-400/50 rounded-lg px-2.5 py-1.5 transition shadow-sm" title="Landing page language">
+            <Languages className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <select
-              className="bg-transparent text-xs font-medium text-zinc-200 outline-none cursor-pointer pr-1"
+              className="bg-transparent text-xs font-semibold text-zinc-100 outline-none cursor-pointer pr-1"
               value={s.theme.language || 'en'}
               onChange={(e) => s.setLanguage(e.target.value as LanguageCode)}
             >
               {SUPPORTED_LANGUAGES.map((l) => (
-                <option key={l.code} value={l.code} className="bg-[#101018] text-white">
-                  {l.flag} {l.nativeLabel}
+                <option key={l.code} value={l.code} className="bg-[#151524] text-zinc-100 font-medium">
+                  {l.flag} {l.nativeLabel} ({l.label})
                 </option>
               ))}
             </select>
@@ -262,7 +290,7 @@ export default function Studio() {
                 onClick={() => handleTranslateAI(s.theme.language!)}
                 disabled={translating}
                 title={`Translate full copy to ${SUPPORTED_LANGUAGES.find((l) => l.code === s.theme.language)?.label} using AI`}
-                className="text-xs bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-400/40 px-2 py-0.5 rounded flex items-center gap-1 transition disabled:opacity-50 ml-1"
+                className="text-xs bg-indigo-500/25 hover:bg-indigo-500/40 text-indigo-200 border border-indigo-400/50 px-2 py-0.5 rounded flex items-center gap-1 transition disabled:opacity-50 ml-1 font-semibold"
               >
                 {translating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-indigo-400" />}
                 <span className="hidden sm:inline">AI Translate</span>
@@ -270,13 +298,13 @@ export default function Studio() {
             )}
           </div>
 
-          <div className="flex bg-white/5 border border-white/10 rounded-lg p-0.5">
+          <div className="flex bg-[#12121e] border border-white/15 rounded-lg p-0.5">
             {DEVICES.map((d) => (
               <button
                 key={d.id}
                 title={d.label}
                 onClick={() => s.setDevice(d.id)}
-                className={`p-1.5 rounded-md transition ${s.device === d.id ? 'bg-indigo-500 text-white' : 'text-zinc-400 hover:text-white'}`}
+                className={`p-1.5 rounded-md transition ${s.device === d.id ? 'bg-indigo-600 text-white' : 'text-zinc-400 hover:text-white'}`}
               >
                 <d.icon className="w-4 h-4" />
               </button>
@@ -290,6 +318,16 @@ export default function Studio() {
               className="flex items-center gap-1.5 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 text-sm font-medium px-3 py-2 rounded-lg transition"
             >
               <Award className="w-4 h-4" /> Badges
+            </button>
+          )}
+
+          {s.meta && (
+            <button
+              onClick={() => setLaunchModalOpen(true)}
+              title="Viral Launch Kit: Twitter Thread, Show HN, Reddit, and Product Hunt pitch"
+              className="flex items-center gap-1.5 border border-amber-400/40 text-amber-300 hover:bg-amber-400/10 text-sm font-medium px-3 py-2 rounded-lg transition"
+            >
+              <Megaphone className="w-4 h-4 text-amber-400" /> Launch Kit
             </button>
           )}
 
@@ -335,11 +373,17 @@ export default function Studio() {
             <button onClick={() => { setBadgeModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Award className="w-4 h-4 text-cyan-400" /> README Badges <span className="text-xs text-zinc-500 ml-auto">.md</span>
             </button>
+            <button onClick={() => { setLaunchModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-amber-500/10 text-sm text-left text-amber-300 font-medium">
+              <Megaphone className="w-4 h-4 text-amber-400" /> Launch Kit <span className="text-xs text-amber-400/80 ml-auto">Viral Copy</span>
+            </button>
             <button onClick={() => { setPublishModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 text-sm text-left text-emerald-300 font-medium">
               <Globe className="w-4 h-4 text-emerald-400" /> Publish to GitHub Pages <span className="text-xs text-emerald-400/80 ml-auto">1-Click</span>
             </button>
             <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Sparkles className="w-4 h-4 text-fuchsia-400" /> React component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
+            </button>
+            <button onClick={() => { openSocialPreview(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
+              <Eye className="w-4 h-4 text-amber-400" /> Social Card Preview <span className="text-xs text-zinc-500 ml-auto">Inspector</span>
             </button>
             <button onClick={() => { doExportOG(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Share2 className="w-4 h-4 text-amber-400" /> Social Card (OG Image) <span className="text-xs text-zinc-500 ml-auto">.png</span>
@@ -418,7 +462,7 @@ export default function Studio() {
             <button
               key={k}
               onClick={() => s.toggleSection(k)}
-              className={`text-xs px-3 py-1.5 rounded-full border backdrop-blur transition ${s.theme[k] ? 'bg-indigo-500/20 border-indigo-400/50 text-indigo-200' : 'bg-black/40 border-white/10 text-zinc-500 line-through'}`}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur transition shadow-sm ${s.theme[k] ? 'bg-indigo-600/30 border-indigo-400 text-indigo-100 shadow-[0_0_12px_rgba(99,102,241,0.3)]' : 'bg-[#151522]/90 border-white/20 text-zinc-300 line-through hover:text-white hover:border-white/40'}`}
             >
               {label}
             </button>
@@ -439,7 +483,7 @@ export default function Studio() {
             <label className="block text-sm font-medium mb-1.5">GitHub Personal Token <span className="text-zinc-500 font-normal">(optional, avoids 60 req/hr limits)</span></label>
             <input
               type="password"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono placeholder:text-zinc-500"
               placeholder="ghp_…"
               value={s.githubToken}
               onChange={(e) => s.setGithubToken(e.target.value)}
@@ -448,20 +492,20 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">AI Enhancement (BYOK)</h3>
             <label className="block text-sm mb-1.5">Provider</label>
             <select
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mb-3"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2.5 text-sm mb-3 font-medium cursor-pointer"
               value={s.aiConfig.provider}
               onChange={(e) => s.setAIConfig({ ...s.aiConfig, provider: e.target.value as any })}
             >
-              <option value="openai">OpenAI</option>
-              <option value="gemini">Google Gemini</option>
-              <option value="groq">Groq</option>
-              <option value="custom">Custom (OpenAI-compatible)</option>
+              <option value="openai" className="bg-[#151524] text-white">OpenAI</option>
+              <option value="gemini" className="bg-[#151524] text-white">Google Gemini</option>
+              <option value="groq" className="bg-[#151524] text-white">Groq</option>
+              <option value="custom" className="bg-[#151524] text-white">Custom (OpenAI-compatible)</option>
             </select>
 
             <label className="block text-sm mb-1.5">API Key</label>
             <input
               type="password"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono placeholder:text-zinc-500"
               value={s.aiConfig.apiKey}
               onChange={(e) => s.setAIConfig({ ...s.aiConfig, apiKey: e.target.value })}
             />
@@ -470,7 +514,7 @@ export default function Studio() {
               <>
                 <label className="block text-sm mb-1.5">Base URL</label>
                 <input
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono"
+                  className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono placeholder:text-zinc-500"
                   placeholder="https://host/v1"
                   value={s.aiConfig.baseUrl ?? ''}
                   onChange={(e) => s.setAIConfig({ ...s.aiConfig, baseUrl: e.target.value })}
@@ -480,7 +524,7 @@ export default function Studio() {
 
             <label className="block text-sm mb-1.5">Model <span className="text-zinc-500 font-normal">(optional)</span></label>
             <input
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono placeholder:text-zinc-500"
               placeholder={s.aiConfig.provider === 'gemini' ? 'gemini-1.5-flash' : s.aiConfig.provider === 'groq' ? 'llama-3.3-70b-versatile' : 'gpt-4o-mini'}
               value={s.aiConfig.model ?? ''}
               onChange={(e) => s.setAIConfig({ ...s.aiConfig, model: e.target.value })}
@@ -489,18 +533,18 @@ export default function Studio() {
             <label className="block text-sm mb-1.5">Custom AI Instructions <span className="text-zinc-500 font-normal">(optional prompt)</span></label>
             <textarea
               rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 text-zinc-300 resize-none font-sans"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 resize-none font-sans placeholder:text-zinc-500"
               placeholder="e.g. Focus on developer audience, highlight high performance benchmarks, use punchy copy..."
               value={s.aiConfig.customPrompt ?? ''}
               onChange={(e) => s.setAIConfig({ ...s.aiConfig, customPrompt: e.target.value })}
             />
 
-            <p className="text-xs text-zinc-500 leading-relaxed mb-6">
+            <p className="text-xs text-zinc-400 leading-relaxed mb-6">
               Keys are stored only in your browser's localStorage and sent directly from your device to the provider. Without an AI key, everything still works via the built-in heuristic parser.
             </p>
 
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
-            <p className="text-xs text-zinc-500 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
+            <p className="text-xs text-zinc-400 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
             <div className="space-y-1.5 mb-6">
               {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
                 const labels: Record<SectionId, string> = {
@@ -517,8 +561,8 @@ export default function Studio() {
                   newsletter: 'Waitlist / Lead Capture Form',
                 };
                 return (
-                  <div key={sectionId} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm">
-                    <span className="text-zinc-200 font-medium text-xs">{labels[sectionId] || sectionId}</span>
+                  <div key={sectionId} className="flex items-center justify-between bg-[#151524] border border-white/15 rounded-lg px-3 py-2 text-sm">
+                    <span className="text-zinc-100 font-medium text-xs">{labels[sectionId] || sectionId}</span>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => s.moveSection(sectionId, 'up')}
@@ -546,7 +590,7 @@ export default function Studio() {
             <label className="block text-sm mb-1.5">Form Action / Webhook URL <span className="text-zinc-500 font-normal">(optional Formspree/Make/Zapier)</span></label>
             <input
               type="url"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono text-zinc-300"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono placeholder:text-zinc-500"
               placeholder="https://formspree.io/f/xyza..."
               value={s.theme.newsletterEndpoint ?? ''}
               onChange={(e) => s.setNewsletterEndpoint(e.target.value)}
@@ -555,22 +599,37 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Analytics & Visitor Tracking</h3>
             <label className="block text-sm mb-1.5">Provider</label>
             <select
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm mb-3"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2.5 text-sm mb-3 font-medium cursor-pointer"
               value={s.theme.analytics?.provider || 'ga4'}
               onChange={(e) => s.setAnalytics({ provider: e.target.value as any, trackingId: s.theme.analytics?.trackingId || '' })}
             >
-              <option value="ga4">Google Analytics 4 (GA4)</option>
-              <option value="plausible">Plausible Analytics</option>
-              <option value="umami">Umami Analytics</option>
+              <option value="ga4" className="bg-[#151524] text-white">Google Analytics 4 (GA4)</option>
+              <option value="plausible" className="bg-[#151524] text-white">Plausible Analytics</option>
+              <option value="umami" className="bg-[#151524] text-white">Umami Analytics</option>
             </select>
             <label className="block text-sm mb-1.5">Tracking ID / Domain <span className="text-zinc-500 font-normal">(e.g. G-XXXXX or mydomain.com)</span></label>
             <input
               type="text"
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono text-zinc-300"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono placeholder:text-zinc-500"
               placeholder={s.theme.analytics?.provider === 'plausible' ? 'example.com' : 'G-XXXXXXXXXX'}
               value={s.theme.analytics?.trackingId || ''}
               onChange={(e) => s.setAnalytics({ provider: s.theme.analytics?.provider || 'ga4', trackingId: e.target.value })}
             />
+
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Custom Domain (CNAME)</h3>
+            <label className="block text-sm mb-1.5">Custom Domain <span className="text-zinc-500 font-normal">(e.g. mytool.dev or docs.example.com)</span></label>
+            <input
+              type="text"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-2 font-mono placeholder:text-zinc-500"
+              placeholder="e.g. myproject.dev"
+              value={s.theme.customDomain ?? ''}
+              onChange={(e) => s.setCustomDomain(e.target.value)}
+            />
+            {s.theme.customDomain && (
+              <p className="text-xs text-indigo-300/90 mb-5 leading-relaxed bg-indigo-500/10 border border-indigo-500/20 p-2.5 rounded-lg font-mono">
+                Points CNAME automatically to GitHub Pages. Remember to configure DNS: A records (185.199.108.153) or CNAME ({s.meta?.owner || 'owner'}.github.io).
+              </p>
+            )}
 
             {aiMsg && <p className="text-sm mt-4 text-indigo-300">{aiMsg}</p>}
           </div>
@@ -740,6 +799,206 @@ ${s.meta.latestRelease ? `[![Release](https://img.shields.io/github/v/release/${
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Viral Launch Announcement Kit Modal */}
+      {launchModalOpen && s.meta && s.content && (() => {
+        const kit = generateLaunchKit(s.meta, s.content, s.theme.customDomain);
+        const getTabContent = () => {
+          if (launchTab === 'twitter') {
+            return kit.twitterThread.map((tweet, i) => `--- Tweet ${i + 1}/${kit.twitterThread.length} ---\n${tweet}`).join('\n\n');
+          }
+          if (launchTab === 'hn') {
+            return `TITLE:\n${kit.hackerNews.title}\n\nBODY:\n${kit.hackerNews.body}`;
+          }
+          if (launchTab === 'reddit') {
+            return `SUGGESTED SUBREDDITS: ${kit.reddit.subreddits.join(', ')}\n\nTITLE:\n${kit.reddit.title}\n\nPOST CONTENT:\n${kit.reddit.body}`;
+          }
+          if (launchTab === 'ph') {
+            return `TAGLINE:\n${kit.productHunt.tagline}\n\nMAKER FIRST COMMENT:\n${kit.productHunt.makerComment}`;
+          }
+          return '';
+        };
+
+        const copyCurrentTab = () => {
+          navigator.clipboard.writeText(getTabContent()).then(() => {
+            setCopiedLaunch(true);
+            celebrate();
+            setTimeout(() => setCopiedLaunch(false), 2000);
+          });
+        };
+
+        return (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setLaunchModalOpen(false)} />
+            <div className="relative w-full max-w-2xl bg-[#0e0e16] border border-white/10 rounded-2xl p-6 shadow-2xl z-10 flex flex-col max-h-[90vh]">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <Megaphone className="w-5 h-5 text-amber-400" />
+                  <h3 className="text-lg font-bold text-white">Viral Launch Announcement Kit</h3>
+                </div>
+                <button
+                  onClick={() => setLaunchModalOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-400 mt-3 mb-4">
+                Tailored high-converting announcement copy for sharing your repo across developer communities.
+              </p>
+
+              {/* Tabs */}
+              <div className="flex gap-1.5 p-1 bg-white/5 border border-white/10 rounded-xl mb-4 overflow-x-auto text-xs">
+                <button
+                  onClick={() => setLaunchTab('twitter')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'twitter' ? 'bg-indigo-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                >
+                  𝕏 / Twitter Thread (4)
+                </button>
+                <button
+                  onClick={() => setLaunchTab('hn')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'hn' ? 'bg-amber-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                >
+                  Hacker News
+                </button>
+                <button
+                  onClick={() => setLaunchTab('reddit')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'reddit' ? 'bg-rose-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                >
+                  Reddit
+                </button>
+                <button
+                  onClick={() => setLaunchTab('ph')}
+                  className={`flex-1 py-1.5 px-3 rounded-lg font-medium transition whitespace-nowrap ${launchTab === 'ph' ? 'bg-emerald-600 text-white shadow' : 'text-zinc-400 hover:text-white'}`}
+                >
+                  Product Hunt
+                </button>
+              </div>
+
+              {/* Content view */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                {launchTab === 'twitter' && (
+                  <div className="space-y-3">
+                    {kit.twitterThread.map((tweet, idx) => (
+                      <div key={idx} className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                        <div className="text-[10px] font-mono text-indigo-400 mb-1.5 flex justify-between items-center">
+                          <span>Tweet {idx + 1} of {kit.twitterThread.length}</span>
+                          <span className="text-zinc-500">{tweet.length} chars</span>
+                        </div>
+                        <div className="whitespace-pre-wrap leading-relaxed">{tweet}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {launchTab === 'hn' && (
+                  <div className="space-y-3">
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-amber-400 mb-1">HN Post Title</div>
+                      <div className="font-semibold text-white">{kit.hackerNews.title}</div>
+                    </div>
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-amber-400 mb-1">Submission Body</div>
+                      <div className="whitespace-pre-wrap leading-relaxed">{kit.hackerNews.body}</div>
+                    </div>
+                  </div>
+                )}
+
+                {launchTab === 'reddit' && (
+                  <div className="space-y-3">
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-rose-400 mb-1.5">Recommended Subreddits</div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {kit.reddit.subreddits.map(sub => (
+                          <span key={sub} className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono text-[11px]">{sub}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-rose-400 mb-1">Post Title</div>
+                      <div className="font-semibold text-white">{kit.reddit.title}</div>
+                    </div>
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-rose-400 mb-1">Post Markdown</div>
+                      <div className="whitespace-pre-wrap leading-relaxed">{kit.reddit.body}</div>
+                    </div>
+                  </div>
+                )}
+
+                {launchTab === 'ph' && (
+                  <div className="space-y-3">
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-emerald-400 mb-1">Product Tagline (60 chars)</div>
+                      <div className="font-semibold text-white">{kit.productHunt.tagline}</div>
+                    </div>
+                    <div className="bg-black/50 border border-white/10 rounded-xl p-3.5 text-xs text-zinc-200">
+                      <div className="text-[10px] font-mono text-emerald-400 mb-1">Maker First Comment</div>
+                      <div className="whitespace-pre-wrap leading-relaxed">{kit.productHunt.makerComment}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-between items-center pt-4 border-t border-white/10 mt-4">
+                <span className="text-[11px] text-zinc-500">Ready to copy and share</span>
+                <button
+                  onClick={copyCurrentTab}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-lg text-sm transition"
+                >
+                  {copiedLaunch ? <><Check className="w-4 h-4" /> Copied!</> : <><Clipboard className="w-4 h-4" /> Copy Tab Content</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Social Card Preview Inspector Modal */}
+      {socialModalOpen && ogPreviewUrl && s.meta && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setSocialModalOpen(false)} />
+          <div className="relative w-full max-w-3xl bg-[#0e0e16] border border-white/10 rounded-2xl p-6 shadow-2xl z-10 flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+              <div className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-indigo-400" />
+                <h3 className="text-lg font-bold text-white">Social Card (Open Graph) Inspector</h3>
+              </div>
+              <button
+                onClick={() => setSocialModalOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-400 mb-4">
+              Real-time 1200×630px card generated directly from your repository metadata and active theme settings. This is how your landing page appears when shared on 𝕏/Twitter, LinkedIn, Slack, and Discord.
+            </p>
+
+            <div className="bg-black/60 border border-white/10 rounded-xl p-3 overflow-hidden mb-4">
+              <img
+                src={ogPreviewUrl}
+                alt="Social Card Preview"
+                className="w-full rounded-lg shadow-xl border border-white/5 object-cover"
+              />
+            </div>
+
+            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+              <span className="text-xs text-zinc-500 font-mono">1200 × 630 px • PNG</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={doExportOG}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg text-sm transition"
+                >
+                  <Download className="w-4 h-4" /> Download OG Image
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
