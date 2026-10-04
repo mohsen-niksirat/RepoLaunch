@@ -32,7 +32,7 @@ interface StudioState {
   setAIConfig: (c: AIConfig) => void;
   setThemeId: (t: ThemeId) => void;
   setAccent: (c: string) => void;
-  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter') => void;
+  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
   moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
   generate: (url: string) => Promise<void>;
@@ -67,8 +67,10 @@ export const useStudio = create<StudioState>()(
         showFaq: true,
         showTechStack: true,
         showNewsletter: true,
+        showChangelog: true,
+        showStarHistory: true,
         newsletterEndpoint: '',
-        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter'],
+        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'],
       },
       device: 'desktop',
       settingsOpen: false,
@@ -86,7 +88,7 @@ export const useStudio = create<StudioState>()(
       setNewsletterEndpoint: (endpoint) => set((s) => ({ theme: { ...s.theme, newsletterEndpoint: endpoint } })),
       moveSection: (id, direction) => {
         set((state) => {
-          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter'];
+          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'];
           const order = [...currentOrder];
           const idx = order.indexOf(id);
           if (idx === -1) return state;
@@ -102,11 +104,11 @@ export const useStudio = create<StudioState>()(
       generate: async (url) => {
         set({ status: 'loading', error: '', loadingMsg: 'Fetching repository from GitHub…', usingMock: false });
         try {
-          const { meta, readme } = await fetchRepoMetadata(url, get().githubToken || undefined);
+          const { meta, readme, releases } = await fetchRepoMetadata(url, get().githubToken || undefined);
           set({
             meta,
             readme,
-            content: buildHeuristicContent(meta, readme),
+            content: buildHeuristicContent(meta, readme, releases),
             status: 'ready',
             urlInput: url,
           });
@@ -121,7 +123,7 @@ export const useStudio = create<StudioState>()(
         set({
           meta: preset.meta,
           readme: preset.readme,
-          content: buildHeuristicContent(preset.meta, preset.readme),
+          content: buildHeuristicContent(preset.meta, preset.readme, preset.releases),
           status: 'ready',
           urlInput: preset.meta.repoUrl,
           usingMock: true,

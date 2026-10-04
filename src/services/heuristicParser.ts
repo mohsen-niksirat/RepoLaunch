@@ -1,4 +1,5 @@
-import type { LandingPageContent, RepoMetadata, FeatureItem, QuickstartTab, FAQItem } from '../types';
+import type { LandingPageContent, RepoMetadata, FeatureItem, QuickstartTab, FAQItem, ReleaseItem } from '../types';
+import { calculateStarHistory } from './starHistory';
 
 // ─── Heuristic README → landing content parser (works with zero AI) ──────────
 
@@ -202,7 +203,7 @@ function extractScreenshots(rawMd: string, meta: RepoMetadata): { url: string; c
   return screenshots.slice(0, 4);
 }
 
-export function buildHeuristicContent(meta: RepoMetadata, readme: string): LandingPageContent {
+export function buildHeuristicContent(meta: RepoMetadata, readme: string, releases?: ReleaseItem[]): LandingPageContent {
   const md = cleanReadme(readme || '');
   const excerpt = extractFirstParagraph(md) || meta.description || `A modern open-source project from ${meta.owner}.`;
 
@@ -241,6 +242,14 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string): Landi
   const techStack = extractTechStack(meta, md).map((label) => ({ label }));
   const screenshots = extractScreenshots(readme || '', meta);
 
+  const changelog: ReleaseItem[] = releases && releases.length > 0
+    ? releases
+    : meta.latestRelease
+    ? [{ tagName: meta.latestRelease.tagName, name: 'Latest Stable Release', publishedAt: meta.latestRelease.publishedAt || 'Recent', body: 'Production-ready build with new features, dependency upgrades, and performance optimizations.' }]
+    : [];
+
+  const starHistory = calculateStarHistory(meta);
+
   return {
     hero: {
       eyebrow,
@@ -278,5 +287,7 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string): Landi
       placeholder: 'Enter your email address...',
       buttonText: 'Subscribe',
     },
+    changelog,
+    starHistory,
   };
 }

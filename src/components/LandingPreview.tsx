@@ -4,6 +4,7 @@ import {
   Copy, Star, ChevronDown, Github, ArrowRight, Check,
 } from 'lucide-react';
 import type { LandingPageContent, RepoMetadata, ThemeConfig } from '../types';
+import { renderStarHistorySvg } from '../services/starHistory';
 
 const ICONS: Record<string, any> = { Zap, ShieldCheck, Rocket, Layers, Gauge, Globe, Plug, Boxes, Sparkles, Wrench };
 
@@ -268,6 +269,58 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                   </button>
                 </div>
                 <pre className="px-5 pb-5 pt-3 overflow-x-auto text-sm font-mono text-zinc-200 whitespace-pre">{content.quickstart[tab]?.command}</pre>
+              </div>
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'starHistory') {
+          return theme.showStarHistory !== false && content.starHistory && content.starHistory.length > 0 ? (
+            <section key="starHistory" className="max-w-3xl mx-auto px-6 py-12">
+              <div className={`p-6 md:p-8 ${cardCls}`}>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight">Community Growth & Star Velocity</h2>
+                    <p className={`text-xs ${muted}`}>Trajectory across releases and milestones</p>
+                  </div>
+                  <span className={`px-3 py-1 text-xs font-mono font-semibold flex items-center gap-1.5 ${cardCls}`}>
+                    <Star className="w-3.5 h-3.5 fill-current" /> {meta.stars.toLocaleString()} Stars
+                  </span>
+                </div>
+                <div
+                  className="py-2"
+                  dangerouslySetInnerHTML={{ __html: renderStarHistorySvg(content.starHistory, accent, isTerminal) }}
+                />
+              </div>
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'changelog') {
+          return theme.showChangelog !== false && content.changelog && content.changelog.length > 0 ? (
+            <section key="changelog" className="max-w-3xl mx-auto px-6 py-12">
+              <h2 className="text-3xl font-extrabold text-center mb-8 tracking-tight">Recent Releases & Changelog</h2>
+              <div className="space-y-4">
+                {content.changelog.map((rel, i) => (
+                  <div key={i} className={`p-6 ${cardCls}`}>
+                    <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${isTerminal ? 'bg-green-500/20 text-green-300 border border-green-700' : isBrutal ? 'bg-black text-white' : 'bg-white/10 text-white'}`}>
+                          <Editable value={rel.tagName} path={`changelog.${i}.tagName`} onEdit={onEdit} />
+                        </span>
+                        <h3 className="font-semibold text-base">
+                          <Editable value={rel.name} path={`changelog.${i}.name`} onEdit={onEdit} />
+                        </h3>
+                      </div>
+                      <span className={`text-xs font-mono ${muted}`}>{rel.publishedAt}</span>
+                    </div>
+                    {rel.body && (
+                      <p className={`text-xs leading-relaxed mt-2 ${muted}`}>
+                        <Editable value={rel.body} path={`changelog.${i}.body`} onEdit={onEdit} as="span" />
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
             </section>
           ) : null;

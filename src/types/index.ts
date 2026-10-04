@@ -13,6 +13,7 @@ export interface RepoMetadata {
   name: string;
   language: string | null;
   homepage: string | null;
+  createdAt?: string;
   latestRelease?: {
     tagName: string;
     publishedAt?: string;
@@ -66,6 +67,18 @@ export interface FooterLink {
   href: string;
 }
 
+export interface ReleaseItem {
+  tagName: string;
+  name: string;
+  publishedAt: string;
+  body: string;
+}
+
+export interface StarPoint {
+  date: string;
+  stars: number;
+}
+
 export interface LandingPageContent {
   hero: HeroContent;
   features: FeatureItem[];
@@ -81,11 +94,13 @@ export interface LandingPageContent {
     placeholder: string;
     buttonText: string;
   };
+  changelog?: ReleaseItem[];
+  starHistory?: StarPoint[];
 }
 
 export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal';
 
-export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq' | 'newsletter';
+export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq' | 'newsletter' | 'starHistory' | 'changelog';
 
 export interface ThemeConfig {
   themeId: ThemeId;
@@ -96,6 +111,8 @@ export interface ThemeConfig {
   showFaq: boolean;
   showTechStack: boolean;
   showNewsletter?: boolean;
+  showChangelog?: boolean;
+  showStarHistory?: boolean;
   newsletterEndpoint?: string;
   sectionOrder: SectionId[];
 }

@@ -1,4 +1,5 @@
 import type { LandingPageContent, RepoMetadata, ThemeConfig } from '../types';
+import { renderStarHistorySvg } from './starHistory';
 
 // ─── Export engine: standalone HTML / React JSX / ZIP bundle ─────────────────
 
@@ -219,6 +220,43 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     ? `<section class="max-w-4xl mx-auto px-6 py-12 text-center"><h3 class="text-sm font-semibold uppercase tracking-widest mb-4" style="color:var(--muted)">Built with</h3><div class="flex flex-wrap justify-center gap-2">${tech}</div></section>`
     : '';
 
+  const starHistorySection = theme.showStarHistory !== false && content.starHistory && content.starHistory.length > 0
+    ? `<section class="max-w-3xl mx-auto px-6 py-14">
+    <div class="rl-card p-6 md:p-8">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <h2 style="font-size:20px;font-weight:700;letter-spacing:-0.02em">Community Growth & Star Velocity</h2>
+          <p style="font-size:13px;color:var(--muted);margin-top:2px">Trajectory across releases and milestones</p>
+        </div>
+        <span class="rl-card px-3 py-1 text-xs font-mono font-semibold" style="display:inline-flex;align-items:center;gap:6px">
+          ${iconSvg('Star', 'w-3.5 h-3.5')} ${meta.stars.toLocaleString()} Stars
+        </span>
+      </div>
+      <div style="padding:10px 0">${renderStarHistorySvg(content.starHistory, theme.accentColor, theme.themeId === 'matrix-terminal')}</div>
+    </div>
+  </section>`
+    : '';
+
+  const changelogSection = theme.showChangelog !== false && content.changelog && content.changelog.length > 0
+    ? `<section class="max-w-3xl mx-auto px-6 py-14">
+    <h2 class="text-2xl md:text-3xl font-bold text-center mb-8">Recent Releases & Changelog</h2>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      ${content.changelog.map((rel) => `
+        <div class="rl-card p-6">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="rl-eyebrow px-2.5 py-0.5 rounded-full text-xs font-mono font-bold">${esc(rel.tagName)}</span>
+              <h3 style="font-weight:600;font-size:16px">${esc(rel.name)}</h3>
+            </div>
+            <span style="font-size:12px;color:var(--muted);font-family:monospace">${esc(rel.publishedAt)}</span>
+          </div>
+          ${rel.body ? `<p style="font-size:13px;color:var(--muted);line-height:1.6;margin-top:8px">${esc(rel.body)}</p>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  </section>`
+    : '';
+
   const newsletterSection = theme.showNewsletter !== false
     ? `<section class="max-w-2xl mx-auto px-6 py-16 text-center">
     <div class="rl-card p-8 md:p-10 relative overflow-hidden">
@@ -237,6 +275,8 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     features: `<section class="container px-6 py-16"><h2 class="section-title">Why ${esc(meta.name)}?</h2><div class="grid">${features}</div></section>`,
     howItWorks: howItWorksSection,
     quickstart: quickstartSection,
+    starHistory: starHistorySection,
+    changelog: changelogSection,
     techStack: techSection,
     faq: faqSection,
     newsletter: newsletterSection,
@@ -244,7 +284,7 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 
   const order = theme.sectionOrder && theme.sectionOrder.length
     ? theme.sectionOrder
-    : ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter'];
+    : ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter'];
 
   const renderedSections = order.map((k) => sectionMap[k] || '').filter(Boolean).join('\n\n');
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink, Award, Check } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -51,6 +51,8 @@ export default function Studio() {
   const [aiMsg, setAiMsg] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
   const [copiedHtml, setCopiedHtml] = useState(false);
+  const [badgeModalOpen, setBadgeModalOpen] = useState(false);
+  const [copiedBadge, setCopiedBadge] = useState(false);
 
   const handleEdit = (path: string, value: string) => {
     s.updateContent((d) => {
@@ -208,6 +210,16 @@ export default function Studio() {
 
           {s.meta && (
             <button
+              onClick={() => setBadgeModalOpen(true)}
+              title="Get README Badges & Markdown"
+              className="flex items-center gap-1.5 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-400/10 text-sm font-medium px-3 py-2 rounded-lg transition"
+            >
+              <Award className="w-4 h-4" /> Badges
+            </button>
+          )}
+
+          {s.meta && (
+            <button
               onClick={doEnhance}
               disabled={aiBusy}
               title="Enhance copy with AI (BYOK)"
@@ -244,6 +256,9 @@ export default function Studio() {
             <button onClick={() => { doCopyHTML(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               {copiedHtml ? <ClipboardCheck className="w-4 h-4 text-emerald-400" /> : <Clipboard className="w-4 h-4 text-cyan-400" />}
               <span>{copiedHtml ? 'Copied to Clipboard!' : 'Copy HTML'}</span>
+            </button>
+            <button onClick={() => { setBadgeModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
+              <Award className="w-4 h-4 text-cyan-400" /> README Badges <span className="text-xs text-zinc-500 ml-auto">.md</span>
             </button>
             <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Sparkles className="w-4 h-4 text-fuchsia-400" /> React component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
@@ -321,7 +336,7 @@ export default function Studio() {
       {/* Section toggles (floating) */}
       {s.content && (
         <div className="fixed bottom-4 left-4 z-40 flex gap-2">
-          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
+          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
             <button
               key={k}
               onClick={() => s.toggleSection(k)}
@@ -409,12 +424,14 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
             <p className="text-xs text-zinc-500 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
             <div className="space-y-1.5 mb-6">
-              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
+              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
                 const labels: Record<SectionId, string> = {
                   showcase: 'Screenshot / Showcase',
                   features: 'Key Features Grid',
                   howItWorks: 'How It Works (Steps)',
                   quickstart: 'Quickstart & Terminal',
+                  starHistory: 'Star Velocity & Growth Chart',
+                  changelog: 'Recent Releases & Changelog',
                   techStack: 'Tech Stack & Ecosystem',
                   faq: 'Frequently Asked Questions',
                   newsletter: 'Waitlist / Lead Capture Form',
@@ -456,6 +473,57 @@ export default function Studio() {
             />
 
             {aiMsg && <p className="text-sm mt-4 text-indigo-300">{aiMsg}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* README Badges Modal */}
+      {badgeModalOpen && s.meta && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setBadgeModalOpen(false)} />
+          <div className="relative w-full max-w-lg bg-[#0e0e16] border border-white/10 rounded-2xl p-6 shadow-2xl z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Award className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-bold">README Badges & Markdown</h3>
+              </div>
+              <button onClick={() => setBadgeModalOpen(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
+              Paste these shields into the top of your GitHub <code className="bg-white/10 px-1 py-0.5 rounded text-white">README.md</code> to drive traffic straight to your new landing page!
+            </p>
+
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-4 flex flex-wrap gap-2 items-center justify-center">
+              <img src="https://img.shields.io/badge/Landing_Page-RepoLaunch-818cf8?style=for-the-badge&logo=rocket&logoColor=white" alt="Landing Page Badge" />
+              <img src={`https://img.shields.io/github/stars/${s.meta.owner}/${s.meta.name}?style=for-the-badge&logo=github&color=34d399`} alt="GitHub Stars Badge" />
+              {s.meta.latestRelease && (
+                <img src={`https://img.shields.io/github/v/release/${s.meta.owner}/${s.meta.name}?style=for-the-badge&color=fbbf24`} alt="Release Badge" />
+              )}
+            </div>
+
+            <div className="relative bg-black/60 border border-white/10 rounded-xl p-3 font-mono text-xs text-zinc-300 overflow-x-auto whitespace-pre mb-5">
+{`[![Landing Page](https://img.shields.io/badge/Landing_Page-RepoLaunch-818cf8?style=for-the-badge&logo=rocket&logoColor=white)](https://${s.meta.owner}.github.io/${s.meta.name}/)
+[![GitHub Stars](https://img.shields.io/github/stars/${s.meta.owner}/${s.meta.name}?style=for-the-badge&logo=github&color=34d399)](https://github.com/${s.meta.owner}/${s.meta.name})
+${s.meta.latestRelease ? `[![Release](https://img.shields.io/github/v/release/${s.meta.owner}/${s.meta.name}?style=for-the-badge&color=fbbf24)](https://github.com/${s.meta.owner}/${s.meta.name}/releases)` : ''}`}
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  const snippet = `[![Landing Page](https://img.shields.io/badge/Landing_Page-RepoLaunch-818cf8?style=for-the-badge&logo=rocket&logoColor=white)](https://${s.meta?.owner}.github.io/${s.meta?.name}/)\n[![GitHub Stars](https://img.shields.io/github/stars/${s.meta?.owner}/${s.meta?.name}?style=for-the-badge&logo=github&color=34d399)](https://github.com/${s.meta?.owner}/${s.meta?.name})${s.meta?.latestRelease ? `\n[![Release](https://img.shields.io/github/v/release/${s.meta?.owner}/${s.meta?.name}?style=for-the-badge&color=fbbf24)](https://github.com/${s.meta?.owner}/${s.meta?.name}/releases)` : ''}`;
+                  navigator.clipboard.writeText(snippet).then(() => {
+                    setCopiedBadge(true);
+                    celebrate();
+                    setTimeout(() => setCopiedBadge(false), 2000);
+                  });
+                }}
+                className="flex items-center gap-1.5 px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold rounded-lg text-sm transition"
+              >
+                {copiedBadge ? <><Check className="w-4 h-4" /> Copied!</> : <><Clipboard className="w-4 h-4" /> Copy Markdown</>}
+              </button>
+            </div>
           </div>
         </div>
       )}
