@@ -145,6 +145,34 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
         </div>
       </header>
 
+      {/* Product Showcase / Screenshots */}
+      {theme.showScreenshots && content.screenshots && content.screenshots.length > 0 && (
+        <section className="max-w-5xl mx-auto px-6 -mt-2 mb-16">
+          <div className={`overflow-hidden ${cardCls}`}>
+            <div className={`flex items-center gap-2 px-4 py-3 border-b ${isBrutal ? 'border-black bg-white' : isMidnight ? 'border-white/10 bg-white/[0.02]' : 'border-gray-200 bg-gray-50'}`}>
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                <div className="w-3 h-3 rounded-full bg-green-500/80" />
+              </div>
+              <span className={`text-xs mx-auto font-mono ${muted}`}>{meta.name} / preview</span>
+            </div>
+            <div className="p-3 md:p-6 bg-black/10 flex flex-col justify-center items-center">
+              <img
+                src={content.screenshots[0].url}
+                alt={content.screenshots[0].caption || meta.name}
+                className="rounded-lg shadow-2xl max-h-[520px] w-auto max-w-full object-contain mx-auto"
+                loading="lazy"
+                onError={(e) => { (e.currentTarget.parentElement?.parentElement as HTMLElement)?.style.setProperty('display', 'none'); }}
+              />
+              {content.screenshots[0].caption && (
+                <p className={`text-center text-xs mt-3 ${muted}`}>{content.screenshots[0].caption}</p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Features */}
       <section className="max-w-5xl mx-auto px-6 py-16">
         <h2 className="text-3xl font-extrabold text-center mb-10 tracking-tight">Why {meta.name}?</h2>

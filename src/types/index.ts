@@ -13,11 +13,20 @@ export interface RepoMetadata {
   name: string;
   language: string | null;
   homepage: string | null;
+  latestRelease?: {
+    tagName: string;
+    publishedAt?: string;
+  } | null;
 }
 
 export interface Badge {
   label: string;
   value: string;
+}
+
+export interface ScreenshotItem {
+  url: string;
+  caption?: string;
 }
 
 export interface HeroContent {
@@ -60,6 +69,7 @@ export interface FooterLink {
 export interface LandingPageContent {
   hero: HeroContent;
   features: FeatureItem[];
+  screenshots: ScreenshotItem[];
   quickstart: QuickstartTab[];
   techStack: TechPill[];
   faq: FAQItem[];
@@ -74,6 +84,7 @@ export interface ThemeConfig {
   accentColor: string;
   fontStyle: 'sans' | 'mono';
   showTerminal: boolean;
+  showScreenshots: boolean;
   showFaq: boolean;
   showTechStack: boolean;
 }

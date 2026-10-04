@@ -86,6 +86,21 @@ export async function fetchRepoMetadata(url: string, token?: string): Promise<{ 
     homepage: data.homepage ?? null,
   };
 
+  try {
+    const relRes = await fetch(`https://api.github.com/repos/${parsed.owner}/${parsed.repo}/releases/latest`, { headers: authHeaders(token) });
+    if (relRes.ok) {
+      const relData = await relRes.json();
+      if (relData.tag_name) {
+        meta.latestRelease = {
+          tagName: relData.tag_name,
+          publishedAt: relData.published_at ? relData.published_at.slice(0, 10) : undefined,
+        };
+      }
+    }
+  } catch {
+    // Ignore release fetch error
+  }
+
   const readme = await fetchReadme(parsed.owner, parsed.repo, meta.defaultBranch, token);
   return { meta, readme };
 }
@@ -119,6 +134,7 @@ export const MOCK_PRESETS: Record<string, { meta: RepoMetadata; readme: string }
       topics: ['express', 'nodejs', 'framework', 'web', 'rest'],
       defaultBranch: 'master', repoUrl: 'https://github.com/expressjs/express',
       owner: 'expressjs', name: 'express', language: 'JavaScript', homepage: 'https://expressjs.com',
+      latestRelease: { tagName: 'v4.21.1' },
     },
     readme: `# Express\n\nFast, unopinionated, minimalist web framework for [node](http://nodejs.org).\n\n## Features\n\n  * Robust routing\n  * Focus on high performance\n  * Super-high test coverage\n  * HTTP helpers (redirection, caching, etc)\n  * View system supporting 14+ template engines\n  * Content negotiation\n  * Executable for generating applications quickly\n\n## Installation\n\nThis is a [Node.js](https://nodejs.org/en/) module available through the\n[npm registry](https://www.npmjs.com/).\n\n\`\`\`bash\n$ npm install express\n\`\`\`\n\nFollow our installing guide for more information.\n\n## Quick Start\n\nInstall the executable. The quickest way to get started with express is to\nutilize the executable [\`express(1)\`](https://github.com/expressjs/generator).\n\nInstall it as follows:\n\n\`\`\`bash\n$ npm install -g express-generator\n\`\`\`\n\n## Docs & Community\n\n  * Website and Documentation - [[website]](https://expressjs.com)\n  * #express on freenode IRC\n  * [Github Organization](https://github.com/expressjs) for Official Middleware & Modules\n\n## FAQ\n\n### Is Express open source?\nYes, Express is fully open source under the MIT license.\n\n### Does it support TypeScript?\nCommunity typings are available via @types/express.\n`,
   },
@@ -130,6 +146,7 @@ export const MOCK_PRESETS: Record<string, { meta: RepoMetadata; readme: string }
       topics: ['async', 'fastapi', 'openapi', 'python', 'starlette'],
       defaultBranch: 'master', repoUrl: 'https://github.com/fastapi/fastapi',
       owner: 'fastapi', name: 'fastapi', language: 'Python', homepage: 'https://fastapi.tiangolo.com',
+      latestRelease: { tagName: '0.115.0' },
     },
     readme: `# FastAPI\n\nFastAPI framework, high performance, easy to learn, fast to code, ready for production\n\n## Features\n\n* **Fast**: Very high performance, on par with **NodeJS** and **Go** (thanks to Starlette and Pydantic).\n* **Fast to code**: Increase the speed to develop features by about 200% to 300%.\n* **Fewer bugs**: Reduce about 40% of human induced errors.\n* **Intuitive**: Great editor support. Completion everywhere.\n* **Easy**: Designed to be easy to use and learn.\n* **Short**: Minimize code duplication.\n* **Robust**: Get production-ready code. With automatic interactive documentation.\n* **Standards-based**: Based on the open standards for APIs: OpenAPI and JSON Schema.\n\n## Installation\n\n\`\`\`bash\npip install fastapi\n\`\`\`\n\nYou will also need an ASGI server, for production such as Uvicorn or Hypercorn.\n\n\`\`\`bash\npip install "uvicorn[standard]"\n\`\`\`\n\n## Example\n\n\`\`\`python\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get("/")\nasync def root():\n    return {"message": "Hello World"}\n\`\`\`\n\n## FAQ\n\n### Is FastAPI production ready?\nYes — it is used by companies like Uber, Netflix and Microsoft in production.\n`,
   },
@@ -141,6 +158,7 @@ export const MOCK_PRESETS: Record<string, { meta: RepoMetadata; readme: string }
       topics: ['radix-ui', 'react', 'shadcn', 'tailwind', 'components'],
       defaultBranch: 'main', repoUrl: 'https://github.com/shadcn-ui/ui',
       owner: 'shadcn-ui', name: 'ui', language: 'TypeScript', homepage: 'https://ui.shadcn.com',
+      latestRelease: { tagName: 'v2.1.0' },
     },
     readme: `# shadcn/ui\n\nBeautifully designed components that you can copy and paste into your apps. Accessible. Customizable. Open Source.\n\n## Features\n\n* Beautifully designed components\n* Accessible (WAI-ARIA compliant via Radix UI)\n* Themeable with CSS variables\n* Copy and paste into your projects\n* Free and open source\n* CLI for easy installation\n\n## Installation\n\n\`\`\`bash\nnpx shadcn@latest init\n\`\`\`\n\nAdd a button:\n\n\`\`\`bash\nnpx shadcn@latest add button\n\`\`\`\n\n## FAQ\n\n### Is this a component library?\nNo — it is a collection of reusable components you can copy into your app and own the code.\n`,
   },

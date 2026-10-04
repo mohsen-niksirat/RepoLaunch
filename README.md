@@ -10,16 +10,20 @@ Paste a GitHub URL → get a beautiful, mobile-responsive developer landing page
 
 - **GitHub ingestion** — any URL format (`https://github.com/owner/repo`, `owner/repo`, or `git@github.com:owner/repo.git`).
 - **Dual parser engine**
-  - *Heuristic parser* — works 100% offline. Extracts headline, features, quickstart code blocks, tech stack and FAQs straight from the README + repo metadata.
+  - *Heuristic parser* — works 100% offline. Extracts headline, features, quickstart code blocks, tech stack, screenshots and FAQs straight from the README + repo metadata.
   - *AI-enhanced (BYOK)* — plug in OpenAI, Google Gemini, Groq, or any OpenAI-compatible endpoint to rewrite the copy.
-- **3 themes** — Midnight Linear (glassy dark), Neo-Brutalist (bold retro), Clean Minimal (Apple/Stripe).
+- **Product Showcase & Screenshots** — automatically parses images/GIFs from the README and wraps them in a sleek mock browser window frame.
+- **Social Card (OG Image) Generator** — client-side HTML5 Canvas generator produces high-res 1200×630px branded cards for Twitter and LinkedIn with live stars, tags, and theme gradients.
+- **3 themes & 6 Accent Colors** — Midnight Linear (glassy dark), Neo-Brutalist (bold retro), Clean Minimal (Apple/Stripe), plus live color picker (Indigo, Emerald, Amber, Rose, Cyan, Violet).
+- **Latest Release Detection** — fetches live release tags (`v1.2.0`) and features them in hero badges.
 - **Live preview** with device switcher (Desktop / Tablet / Mobile).
-- **In-place editing** — click any headline, subtitle or feature text to edit it; changes persist into exports.
-- **Section toggles** — show/hide Quickstart, Tech Stack, FAQ.
+- **In-place editing** — click any headline, subtitle, feature or step to edit it; changes persist into exports.
+- **Section toggles** — show/hide Showcase, Quickstart, Tech Stack, FAQ.
 - **Export engine**
-  - Standalone `index.html` (self-contained, open it or deploy instantly)
+  - Standalone `index.html` (self-contained with OpenGraph tags, open it or deploy instantly)
   - Ready-to-paste React/JSX component (Tailwind)
-  - Full ZIP bundle with deployment instructions
+  - PNG Social Card download
+  - Full ZIP bundle with deployment instructions + bundled `og-image.png`
   - Confetti 🎉 on export
 
 ## 🛠️ Tech stack

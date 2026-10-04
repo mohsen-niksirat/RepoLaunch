@@ -160,11 +160,55 @@ function extractTechStack(meta: RepoMetadata, md: string): string[] {
   return Array.from(pills).slice(0, 10);
 }
 
+function resolveImageUrl(url: string, meta: RepoMetadata): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  const clean = url.replace(/^\.?\//, '').replace(/^\/+/, '');
+  return `https://raw.githubusercontent.com/${meta.owner}/${meta.name}/${meta.defaultBranch}/${clean}`;
+}
+
+function extractScreenshots(rawMd: string, meta: RepoMetadata): { url: string; caption?: string }[] {
+  const screenshots: { url: string; caption?: string }[] = [];
+  const seen = new Set<string>();
+
+  const isBadge = (url: string) =>
+    /shields\.io|badge|travis-ci|codecov|github-action|workflow|githubassets|fury\.io|coveralls|david-dm|gitter\.im/i.test(url);
+
+  // Markdown images: ![caption](url)
+  const mdImgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+  let m: RegExpExecArray | null;
+  while ((m = mdImgRegex.exec(rawMd)) !== null) {
+    const caption = m[1].trim();
+    let url = m[2].trim().split(/\s+/)[0];
+    if (!url || isBadge(url)) continue;
+    url = resolveImageUrl(url, meta);
+    if (!seen.has(url)) {
+      seen.add(url);
+      screenshots.push({ url, caption: caption || `${meta.name} Preview` });
+    }
+  }
+
+  // HTML images: <img src="..." alt="...">
+  const htmlImgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
+  while ((m = htmlImgRegex.exec(rawMd)) !== null) {
+    let url = m[1].trim();
+    if (!url || isBadge(url)) continue;
+    url = resolveImageUrl(url, meta);
+    if (!seen.has(url)) {
+      seen.add(url);
+      screenshots.push({ url, caption: `${meta.name} Screenshot` });
+    }
+  }
+
+  return screenshots.slice(0, 4);
+}
+
 export function buildHeuristicContent(meta: RepoMetadata, readme: string): LandingPageContent {
   const md = cleanReadme(readme || '');
   const excerpt = extractFirstParagraph(md) || meta.description || `A modern open-source project from ${meta.owner}.`;
 
-  const eyebrow = meta.topics?.[0] ? titleCase(meta.topics[0]) : (meta.language ? `${meta.language} project` : 'Open Source');
+  const eyebrow = meta.latestRelease?.tagName
+    ? `Release ${meta.latestRelease.tagName}`
+    : meta.topics?.[0] ? titleCase(meta.topics[0]) : (meta.language ? `${meta.language} project` : 'Open Source');
   const headline = meta.description && meta.description.length < 90
     ? meta.description
     : `${titleCase(meta.name)} — ${excerpt.split(/[.!?]/)[0].slice(0, 70)}`;
@@ -195,6 +239,7 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string): Landi
   }
 
   const techStack = extractTechStack(meta, md).map((label) => ({ label }));
+  const screenshots = extractScreenshots(readme || '', meta);
 
   return {
     hero: {
@@ -208,10 +253,12 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string): Landi
       badges: [
         { label: 'Stars', value: meta.stars.toLocaleString() },
         { label: 'Forks', value: meta.forks.toLocaleString() },
+        ...(meta.latestRelease ? [{ label: 'Version', value: meta.latestRelease.tagName }] : []),
         ...(meta.license ? [{ label: 'License', value: meta.license }] : []),
       ],
     },
     features,
+    screenshots,
     quickstart,
     techStack,
     faq,

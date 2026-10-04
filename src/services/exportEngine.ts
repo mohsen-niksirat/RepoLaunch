@@ -164,6 +164,23 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   </section>`
     : '';
 
+  const screenshotsSection = theme.showScreenshots && content.screenshots && content.screenshots.length
+    ? `<section class="container px-6 -mt-4 mb-16">
+    <div class="rl-card overflow-hidden">
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)">
+        <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block"></span>
+        <span style="width:10px;height:10px;border-radius:50%;background:#eab308;display:inline-block"></span>
+        <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+        <span style="font-family:monospace;font-size:12px;margin:0 auto;color:var(--muted)">${esc(meta.name)} / preview</span>
+      </div>
+      <div style="padding:16px;background:rgba(0,0,0,0.15);text-align:center">
+        <img src="${esc(content.screenshots[0].url)}" alt="${esc(content.screenshots[0].caption || meta.name)}" style="max-height:520px;max-width:100%;border-radius:8px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.3);margin:0 auto;display:block" onerror="this.parentElement.parentElement.style.display='none'"/>
+        ${content.screenshots[0].caption ? `<p style="font-size:12px;margin-top:10px;color:var(--muted)">${esc(content.screenshots[0].caption)}</p>` : ''}
+      </div>
+    </div>
+  </section>`
+    : '';
+
   const howItWorksSection = content.howItWorks && content.howItWorks.length
     ? `<section class="container px-6 py-16">
     <h2 class="section-title">How it works</h2>
@@ -192,6 +209,14 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>${esc(meta.name)} — ${esc(h.headline)}</title>
 <meta name="description" content="${esc(h.subheadline)}"/>
+<meta property="og:title" content="${esc(meta.name)} — ${esc(h.headline)}"/>
+<meta property="og:description" content="${esc(h.subheadline)}"/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="./og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="${esc(meta.name)} — ${esc(h.headline)}"/>
+<meta name="twitter:description" content="${esc(h.subheadline)}"/>
+<meta name="twitter:image" content="./og-image.png"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -236,6 +261,8 @@ ${css}
   </div>
   <div class="badge-row">${badges}</div>
 </header>
+
+${screenshotsSection}
 
 <section class="container px-6 py-16">
   <h2 class="section-title">Why ${esc(meta.name)}?</h2>

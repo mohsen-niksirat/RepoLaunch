@@ -32,7 +32,7 @@ interface StudioState {
   setAIConfig: (c: AIConfig) => void;
   setThemeId: (t: ThemeId) => void;
   setAccent: (c: string) => void;
-  toggleSection: (k: 'showTerminal' | 'showFaq' | 'showTechStack') => void;
+  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack') => void;
   generate: (url: string) => Promise<void>;
   loadMock: (key: string) => void;
   updateContent: (updater: (draft: LandingPageContent) => void) => void;
@@ -56,7 +56,7 @@ export const useStudio = create<StudioState>()(
       usingMock: false,
 
       urlInput: '',
-      theme: { themeId: 'midnight-linear', accentColor: '#818cf8', fontStyle: 'sans', showTerminal: true, showFaq: true, showTechStack: true },
+      theme: { themeId: 'midnight-linear', accentColor: '#818cf8', fontStyle: 'sans', showTerminal: true, showScreenshots: true, showFaq: true, showTechStack: true },
       device: 'desktop',
       settingsOpen: false,
       githubToken: '',

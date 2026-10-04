@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
 import LandingPreview from './LandingPreview';
 import { generateStandaloneHTML, generateReactComponent, generateDeployReadme } from '../services/exportEngine';
 import { enhanceWithAI } from '../services/aiGenerator';
+import { generateOgImageBlob } from '../services/ogGenerator';
 import { MOCK_PRESETS } from '../services/github';
 import type { ThemeId } from '../types';
 
@@ -88,12 +89,29 @@ export default function Studio() {
     celebrate();
   };
 
+  const doExportOG = async () => {
+    if (!s.meta || !s.content) return;
+    try {
+      const blob = await generateOgImageBlob(s.meta, s.content, s.theme);
+      download(`${s.meta.name}-og-card.png`, blob);
+      celebrate();
+    } catch (e: any) {
+      alert('Failed to generate social card: ' + (e?.message ?? 'Unknown error'));
+    }
+  };
+
   const doExportZip = async () => {
     if (!s.meta || !s.content) return;
     const zip = new JSZip();
     zip.file('index.html', generateStandaloneHTML(s.meta, s.content, s.theme));
     zip.file('LandingPage.tsx', generateReactComponent(s.meta, s.content, s.theme));
     zip.file('README.md', generateDeployReadme(s.meta));
+    try {
+      const ogBlob = await generateOgImageBlob(s.meta, s.content, s.theme);
+      zip.file('og-image.png', ogBlob);
+    } catch {
+      // Optional OG image in zip
+    }
     const blob = await zip.generateAsync({ type: 'blob' });
     download(`${s.meta.name}-landing.zip`, blob);
     celebrate();
@@ -214,8 +232,11 @@ export default function Studio() {
             <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Sparkles className="w-4 h-4 text-fuchsia-400" /> React component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
             </button>
-            <button onClick={() => { doExportZip(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
-              <FileArchive className="w-4 h-4 text-emerald-400" /> Full ZIP bundle
+            <button onClick={() => { doExportOG(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
+              <Share2 className="w-4 h-4 text-amber-400" /> Social Card (OG Image) <span className="text-xs text-zinc-500 ml-auto">.png</span>
+            </button>
+            <button onClick={() => { doExportZip(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left border-t border-white/5">
+              <FileArchive className="w-4 h-4 text-emerald-400" /> Full ZIP bundle <span className="text-xs text-zinc-500 ml-auto">.zip</span>
             </button>
           </div>
         )}
@@ -268,7 +289,7 @@ export default function Studio() {
       {/* Section toggles (floating) */}
       {s.content && (
         <div className="fixed bottom-4 left-4 z-40 flex gap-2">
-          {([['showTerminal', 'Quickstart'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ']] as const).map(([k, label]) => (
+          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ']] as const).map(([k, label]) => (
             <button
               key={k}
               onClick={() => s.toggleSection(k)}
