@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Settings, Monitor, Tablet, Smartphone, Download, Sparkles, X, Loader2, AlertTriangle, Wand2, FileCode2, FileArchive, Eye, Share2, ChevronUp, ChevronDown, Clipboard, ClipboardCheck, ExternalLink } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
@@ -50,6 +50,7 @@ export default function Studio() {
   const [aiBusy, setAiBusy] = useState(false);
   const [aiMsg, setAiMsg] = useState('');
   const [exportOpen, setExportOpen] = useState(false);
+  const [copiedHtml, setCopiedHtml] = useState(false);
 
   const handleEdit = (path: string, value: string) => {
     s.updateContent((d) => {
@@ -81,6 +82,16 @@ export default function Studio() {
     const html = generateStandaloneHTML(s.meta, s.content, s.theme);
     download('index.html', new Blob([html], { type: 'text/html' }));
     celebrate();
+  };
+
+  const doCopyHTML = () => {
+    if (!s.meta || !s.content) return;
+    const html = generateStandaloneHTML(s.meta, s.content, s.theme);
+    navigator.clipboard.writeText(html).then(() => {
+      setCopiedHtml(true);
+      setTimeout(() => setCopiedHtml(false), 2500);
+      celebrate();
+    });
   };
 
   const doExportJSX = () => {
@@ -230,6 +241,10 @@ export default function Studio() {
             <button onClick={() => { doExportHTML(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <FileCode2 className="w-4 h-4 text-indigo-400" /> Standalone HTML <span className="text-xs text-zinc-500 ml-auto">index.html</span>
             </button>
+            <button onClick={() => { doCopyHTML(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
+              {copiedHtml ? <ClipboardCheck className="w-4 h-4 text-emerald-400" /> : <Clipboard className="w-4 h-4 text-cyan-400" />}
+              <span>{copiedHtml ? 'Copied to Clipboard!' : 'Copy HTML'}</span>
+            </button>
             <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Sparkles className="w-4 h-4 text-fuchsia-400" /> React component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
             </button>
@@ -239,6 +254,22 @@ export default function Studio() {
             <button onClick={() => { doExportZip(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left border-t border-white/5">
               <FileArchive className="w-4 h-4 text-emerald-400" /> Full ZIP bundle <span className="text-xs text-zinc-500 ml-auto">.zip</span>
             </button>
+            <a
+              href={`https://vercel.com/new/git/external?repository-url=${encodeURIComponent(s.meta.repoUrl)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 text-xs text-zinc-400 hover:text-white text-left border-t border-white/5"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-violet-400" /> Deploy on Vercel
+            </a>
+            <a
+              href={`https://app.netlify.com/start/deploy?repository=${encodeURIComponent(s.meta.repoUrl)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 text-xs text-zinc-400 hover:text-white text-left"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-teal-400" /> Deploy on Netlify
+            </a>
           </div>
         )}
       </header>
@@ -290,7 +321,7 @@ export default function Studio() {
       {/* Section toggles (floating) */}
       {s.content && (
         <div className="fixed bottom-4 left-4 z-40 flex gap-2">
-          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ']] as const).map(([k, label]) => (
+          {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showTechStack', 'Tech Stack'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
             <button
               key={k}
               onClick={() => s.toggleSection(k)}
@@ -378,7 +409,7 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
             <p className="text-xs text-zinc-500 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
             <div className="space-y-1.5 mb-6">
-              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq']).map((sectionId, idx, arr) => {
+              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
                 const labels: Record<SectionId, string> = {
                   showcase: 'Screenshot / Showcase',
                   features: 'Key Features Grid',
@@ -386,6 +417,7 @@ export default function Studio() {
                   quickstart: 'Quickstart & Terminal',
                   techStack: 'Tech Stack & Ecosystem',
                   faq: 'Frequently Asked Questions',
+                  newsletter: 'Waitlist / Lead Capture Form',
                 };
                 return (
                   <div key={sectionId} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm">
@@ -412,6 +444,16 @@ export default function Studio() {
                 );
               })}
             </div>
+
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Waitlist & Lead Capture</h3>
+            <label className="block text-sm mb-1.5">Form Action / Webhook URL <span className="text-zinc-500 font-normal">(optional Formspree/Make/Zapier)</span></label>
+            <input
+              type="url"
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono text-zinc-300"
+              placeholder="https://formspree.io/f/xyza..."
+              value={s.theme.newsletterEndpoint ?? ''}
+              onChange={(e) => s.setNewsletterEndpoint(e.target.value)}
+            />
 
             {aiMsg && <p className="text-sm mt-4 text-indigo-300">{aiMsg}</p>}
           </div>

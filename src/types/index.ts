@@ -75,11 +75,17 @@ export interface LandingPageContent {
   faq: FAQItem[];
   footerLinks: FooterLink[];
   howItWorks: { title: string; desc: string }[];
+  newsletter?: {
+    heading: string;
+    description: string;
+    placeholder: string;
+    buttonText: string;
+  };
 }
 
 export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal';
 
-export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq';
+export type SectionId = 'showcase' | 'features' | 'howItWorks' | 'quickstart' | 'techStack' | 'faq' | 'newsletter';
 
 export interface ThemeConfig {
   themeId: ThemeId;
@@ -89,6 +95,8 @@ export interface ThemeConfig {
   showScreenshots: boolean;
   showFaq: boolean;
   showTechStack: boolean;
+  showNewsletter?: boolean;
+  newsletterEndpoint?: string;
   sectionOrder: SectionId[];
 }
 

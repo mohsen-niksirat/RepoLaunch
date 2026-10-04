@@ -272,5 +272,11 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string): Landi
       { title: 'Configure', desc: 'Drop in your settings and import the API.' },
       { title: 'Ship', desc: 'Deploy to production with confidence.' },
     ],
+    newsletter: {
+      heading: `Stay updated on ${titleCase(meta.name)}`,
+      description: 'Get notified about new releases, documentation updates, and development progress.',
+      placeholder: 'Enter your email address...',
+      buttonText: 'Subscribe',
+    },
   };
 }

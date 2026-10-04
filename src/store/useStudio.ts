@@ -32,7 +32,8 @@ interface StudioState {
   setAIConfig: (c: AIConfig) => void;
   setThemeId: (t: ThemeId) => void;
   setAccent: (c: string) => void;
-  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack') => void;
+  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter') => void;
+  setNewsletterEndpoint: (endpoint: string) => void;
   moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
   generate: (url: string) => Promise<void>;
   loadMock: (key: string) => void;
@@ -65,7 +66,9 @@ export const useStudio = create<StudioState>()(
         showScreenshots: true,
         showFaq: true,
         showTechStack: true,
-        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq'],
+        showNewsletter: true,
+        newsletterEndpoint: '',
+        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter'],
       },
       device: 'desktop',
       settingsOpen: false,
@@ -80,9 +83,10 @@ export const useStudio = create<StudioState>()(
       setThemeId: (t) => set((s) => ({ theme: { ...s.theme, themeId: t } })),
       setAccent: (c) => set((s) => ({ theme: { ...s.theme, accentColor: c } })),
       toggleSection: (k) => set((s) => ({ theme: { ...s.theme, [k]: !s.theme[k] } })),
+      setNewsletterEndpoint: (endpoint) => set((s) => ({ theme: { ...s.theme, newsletterEndpoint: endpoint } })),
       moveSection: (id, direction) => {
         set((state) => {
-          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq'];
+          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq', 'newsletter'];
           const order = [...currentOrder];
           const idx = order.indexOf(id);
           if (idx === -1) return state;

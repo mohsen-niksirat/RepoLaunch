@@ -51,6 +51,7 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
   const [tab, setTab] = useState(0);
   const [copied, setCopied] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [subscribed, setSubscribed] = useState(false);
   const h = content.hero;
 
   const isMidnight = theme.themeId === 'midnight-linear';
@@ -301,6 +302,43 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                   {openFaq === i && <div className={`px-5 pb-4 text-sm ${muted}`}>{f.answer}</div>}
                 </div>
               ))}
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'newsletter') {
+          return theme.showNewsletter !== false ? (
+            <section key="newsletter" className="max-w-2xl mx-auto px-6 py-14 text-center">
+              <div className={`p-8 md:p-10 relative overflow-hidden ${cardCls}`}>
+                <h2 className="text-2xl md:text-3xl font-extrabold mb-3 tracking-tight">
+                  <Editable value={content.newsletter?.heading || `Stay updated on ${meta.name}`} path="newsletter.heading" onEdit={onEdit} />
+                </h2>
+                <p className={`text-sm mb-6 max-w-md mx-auto ${muted}`}>
+                  <Editable value={content.newsletter?.description || 'Get notified about new releases, documentation updates, and development progress.'} path="newsletter.description" onEdit={onEdit} as="span" />
+                </p>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setSubscribed(true);
+                    setTimeout(() => setSubscribed(false), 3000);
+                  }}
+                  className="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto"
+                >
+                  <input
+                    type="email"
+                    required
+                    placeholder={content.newsletter?.placeholder || 'Enter your email...'}
+                    className={`flex-1 px-4 py-3 rounded-xl border text-sm outline-none transition ${isBrutal ? 'bg-white border-black text-black' : isTerminal ? 'bg-[#06150a] border-green-800 text-green-300' : isMidnight ? 'bg-white/5 border-white/10 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}
+                  />
+                  <button
+                    type="submit"
+                    className={`px-6 py-3 rounded-xl font-semibold text-sm transition ${btnPrimary}`}
+                    style={isMidnight ? { background: accent, color: '#0a0a12' } : undefined}
+                  >
+                    {subscribed ? 'Subscribed! ✓' : (content.newsletter?.buttonText || 'Subscribe')}
+                  </button>
+                </form>
+              </div>
             </section>
           ) : null;
         }
