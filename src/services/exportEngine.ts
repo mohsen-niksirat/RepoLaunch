@@ -329,13 +329,50 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   </section>`
     : '';
 
+  const videoEmbedSection = theme.showVideoEmbed !== false && content.videoEmbed?.videoUrl
+    ? `<section class="max-w-4xl mx-auto px-6 py-12">
+    <div style="text-align:center;margin-bottom:28px">
+      <h2 class="text-2xl md:text-3xl font-bold mb-2">${esc(content.videoEmbed.heading)}</h2>
+      <p style="font-size:14px;color:var(--muted);max-width:540px;margin:0 auto">${esc(content.videoEmbed.description)}</p>
+    </div>
+    <div class="rl-card overflow-hidden" style="border-radius:16px">
+      <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:rgba(0,0,0,0.5)">
+        <iframe src="${esc(content.videoEmbed.videoUrl)}" title="${esc(content.videoEmbed.heading)}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>`
+    : '';
+
+  const roadmapSection = theme.showRoadmap !== false && content.roadmap && content.roadmap.items?.length
+    ? `<section class="container px-6 py-16">
+    <div style="text-align:center;margin-bottom:40px">
+      <h2 class="section-title" style="margin-bottom:8px">${esc(content.roadmap.heading)}</h2>
+      <p style="font-size:14px;color:var(--muted);max-width:540px;margin:0 auto">${esc(content.roadmap.description)}</p>
+    </div>
+    <div class="grid">${content.roadmap.items.map((item) => `
+      <div class="rl-card p-6" style="display:flex;flex-direction:column;justify-content:space-between">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span class="rl-eyebrow px-2.5 py-0.5 rounded-full text-xs font-mono font-bold">${esc(item.phase)}</span>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:${item.status === 'completed' ? 'rgba(34,197,94,0.15);color:#22c55e' : item.status === 'in-progress' ? 'rgba(234,179,8,0.15);color:#eab308' : 'rgba(156,163,175,0.15);color:#9ca3af'}">${item.status === 'completed' ? 'Completed' : item.status === 'in-progress' ? 'In Progress' : 'Planned'}</span>
+          </div>
+          <h3 style="font-weight:600;font-size:16px;margin-bottom:8px">${esc(item.title)}</h3>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6">${esc(item.desc)}</p>
+        </div>
+      </div>`).join('')}
+    </div>
+  </section>`
+    : '';
+
   const sectionMap: Record<string, string> = {
     showcase: screenshotsSection,
+    videoEmbed: videoEmbedSection,
     features: `<section class="container px-6 py-16"><h2 class="section-title">Why ${esc(meta.name)}?</h2><div class="grid">${features}</div></section>`,
     howItWorks: howItWorksSection,
     quickstart: quickstartSection,
     starHistory: starHistorySection,
     changelog: changelogSection,
+    roadmap: roadmapSection,
     techStack: techSection,
     testimonials: testimonialsSection,
     pricing: pricingSection,
@@ -345,7 +382,7 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 
   const order = theme.sectionOrder && theme.sectionOrder.length
     ? theme.sectionOrder
-    : ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];
+    : ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];
 
   const renderedSections = order.map((k) => sectionMap[k] || '').filter(Boolean).join('\n\n');
 

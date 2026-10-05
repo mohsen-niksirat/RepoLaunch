@@ -487,7 +487,7 @@ export default function Studio() {
                 </button>
               </div>
               <div className="flex gap-1.5 flex-wrap">
-                {([['showScreenshots', 'Showcase'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
+                {([['showScreenshots', 'Showcase'], ['showVideoEmbed', 'Video Demo'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showRoadmap', 'Roadmap'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
                   <button
                     key={k}
                     onClick={() => s.toggleSection(k)}
@@ -587,14 +587,16 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
             <p className="text-xs text-zinc-400 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
             <div className="space-y-1.5 mb-6">
-              {(s.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
+              {(s.theme.sectionOrder || ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
                 const labels: Record<SectionId, string> = {
                   showcase: 'Screenshot / Showcase',
+                  videoEmbed: 'Video Demo / Walkthrough',
                   features: 'Key Features Grid',
                   howItWorks: 'How It Works (Steps)',
                   quickstart: 'Quickstart & Terminal',
                   starHistory: 'Star Velocity & Growth Chart',
                   changelog: 'Recent Releases & Changelog',
+                  roadmap: 'Project Roadmap & Milestones',
                   techStack: 'Tech Stack & Ecosystem',
                   testimonials: 'Testimonials & Social Proof',
                   pricing: 'Pricing / GitHub Sponsors',
@@ -635,6 +637,25 @@ export default function Studio() {
               placeholder="https://formspree.io/f/xyza..."
               value={s.theme.newsletterEndpoint ?? ''}
               onChange={(e) => s.setNewsletterEndpoint(e.target.value)}
+            />
+
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Product Video Demo</h3>
+            <label className="block text-sm mb-1.5">Embed URL <span className="text-zinc-500 font-normal">(YouTube embed, Loom, or direct video)</span></label>
+            <input
+              type="url"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono placeholder:text-zinc-500"
+              placeholder="https://www.youtube.com/embed/..."
+              value={s.content?.videoEmbed?.videoUrl ?? ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                s.updateContent((d) => {
+                  if (!d.videoEmbed) {
+                    d.videoEmbed = { heading: 'See It in Action', description: 'Watch a walkthrough demonstration.', videoUrl: val };
+                  } else {
+                    d.videoEmbed.videoUrl = val;
+                  }
+                });
+              }}
             />
 
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Analytics & Visitor Tracking</h3>

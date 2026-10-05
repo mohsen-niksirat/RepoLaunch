@@ -111,6 +111,25 @@ export interface TestimonialsContent {
   items: TestimonialItem[];
 }
 
+export interface RoadmapItem {
+  phase: string;
+  title: string;
+  desc: string;
+  status: 'completed' | 'in-progress' | 'planned';
+}
+
+export interface RoadmapContent {
+  heading: string;
+  description: string;
+  items: RoadmapItem[];
+}
+
+export interface VideoEmbedContent {
+  heading: string;
+  description: string;
+  videoUrl: string;
+}
+
 export interface LandingPageContent {
   hero: HeroContent;
   features: FeatureItem[];
@@ -130,17 +149,21 @@ export interface LandingPageContent {
   starHistory?: StarPoint[];
   pricing?: PricingContent;
   testimonials?: TestimonialsContent;
+  roadmap?: RoadmapContent;
+  videoEmbed?: VideoEmbedContent;
 }
 
 export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal';
 
 export type SectionId =
   | 'showcase'
+  | 'videoEmbed'
   | 'features'
   | 'howItWorks'
   | 'quickstart'
   | 'starHistory'
   | 'changelog'
+  | 'roadmap'
   | 'techStack'
   | 'testimonials'
   | 'pricing'
@@ -186,6 +209,8 @@ export interface ThemeConfig {
   showStarHistory?: boolean;
   showPricing?: boolean;
   showTestimonials?: boolean;
+  showRoadmap?: boolean;
+  showVideoEmbed?: boolean;
   newsletterEndpoint?: string;
   analytics?: AnalyticsConfig;
   customDomain?: string;

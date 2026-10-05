@@ -35,7 +35,7 @@ interface StudioState {
   setAccent: (c: string) => void;
   setLanguage: (lang: LanguageCode) => void;
   translateContent: (lang: LanguageCode) => Promise<void>;
-  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials') => void;
+  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials' | 'showRoadmap' | 'showVideoEmbed') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
   setAnalytics: (analytics?: import('../types').AnalyticsConfig) => void;
   setCustomDomain: (domain: string) => void;
@@ -76,8 +76,10 @@ export const useStudio = create<StudioState>()(
         showStarHistory: true,
         showPricing: true,
         showTestimonials: true,
+        showRoadmap: true,
+        showVideoEmbed: true,
         newsletterEndpoint: '',
-        sectionOrder: ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'],
+        sectionOrder: ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'],
       },
       device: 'desktop',
       settingsOpen: false,
@@ -179,8 +181,8 @@ export const useStudio = create<StudioState>()(
         const merged = { ...currentState, ...(persistedState as any) };
         if (persistedState?.theme) {
           const defaultSections: import('../types').SectionId[] = [
-            'showcase', 'features', 'howItWorks', 'quickstart',
-            'starHistory', 'changelog', 'techStack', 'testimonials',
+            'showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart',
+            'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials',
             'pricing', 'faq', 'newsletter'
           ];
           const persistedOrder: import('../types').SectionId[] = Array.isArray(persistedState.theme.sectionOrder)

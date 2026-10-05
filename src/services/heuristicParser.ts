@@ -369,5 +369,19 @@ export function buildHeuristicContent(meta: RepoMetadata, readme: string, releas
         },
       ],
     },
+    roadmap: {
+      heading: 'Project Roadmap & Milestones',
+      description: `Explore the development milestones, architectural goals, and community roadmap for ${titleCase(meta.name)}.`,
+      items: [
+        { phase: 'Phase 1', title: 'Core Stability & Foundation', desc: `Production-ready core architecture, high test coverage, and documentation for ${meta.name}.`, status: 'completed' },
+        { phase: 'Phase 2', title: 'Ecosystem & Extension APIs', desc: 'Plug-and-play integrations, developer tooling, and expanded runtime compatibility.', status: 'in-progress' },
+        { phase: 'Phase 3', title: 'Enterprise & Scale Optimization', desc: 'High-throughput scaling, enterprise SLA support, and automated benchmarking.', status: 'planned' },
+      ],
+    },
+    videoEmbed: {
+      heading: 'See It in Action',
+      description: `Watch a comprehensive walkthrough and demonstration of ${titleCase(meta.name)}.`,
+      videoUrl: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
+    },
   };
 }

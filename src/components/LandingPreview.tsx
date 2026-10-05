@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Zap, ShieldCheck, Rocket, Layers, Gauge, Globe, Plug, Boxes, Sparkles, Wrench,
-  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart,
+  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart, Milestone, Play,
 } from 'lucide-react';
 import type { LandingPageContent, RepoMetadata, ThemeConfig } from '../types';
 import { renderStarHistorySvg } from '../services/starHistory';
@@ -209,6 +209,35 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
           ) : null;
         }
 
+        if (sectionId === 'videoEmbed') {
+          return theme.showVideoEmbed !== false && content.videoEmbed?.videoUrl ? (
+            <section key="videoEmbed" className="max-w-4xl mx-auto px-6 py-12">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-2" style={{ background: isTerminal ? '#0d2614' : `${accent}18`, color: isTerminal ? '#4ade80' : accent }}>
+                  <Play className="w-3.5 h-3.5" /> Product Demo
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">
+                  <Editable value={content.videoEmbed.heading} path="videoEmbed.heading" onEdit={onEdit} />
+                </h2>
+                <p className={`text-sm max-w-xl mx-auto ${muted}`}>
+                  <Editable value={content.videoEmbed.description} path="videoEmbed.description" onEdit={onEdit} as="span" />
+                </p>
+              </div>
+              <div className={`overflow-hidden rounded-2xl ${cardCls}`}>
+                <div className="aspect-video w-full bg-black/40 relative">
+                  <iframe
+                    src={content.videoEmbed.videoUrl}
+                    title={content.videoEmbed.heading}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full border-0"
+                  />
+                </div>
+              </div>
+            </section>
+          ) : null;
+        }
+
         if (sectionId === 'features') {
           return (
             <section key="features" className="max-w-5xl mx-auto px-6 py-16">
@@ -337,6 +366,56 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                     )}
                   </div>
                 ))}
+              </div>
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'roadmap') {
+          return theme.showRoadmap !== false && content.roadmap && content.roadmap.items?.length > 0 ? (
+            <section key="roadmap" className="max-w-4xl mx-auto px-6 py-14">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-2" style={{ background: isTerminal ? '#0d2614' : `${accent}18`, color: isTerminal ? '#4ade80' : accent }}>
+                  <Milestone className="w-3.5 h-3.5" /> Project Roadmap
+                </div>
+                <h2 className="text-3xl font-extrabold tracking-tight mb-2">
+                  <Editable value={content.roadmap.heading} path="roadmap.heading" onEdit={onEdit} />
+                </h2>
+                <p className={`text-sm max-w-xl mx-auto ${muted}`}>
+                  <Editable value={content.roadmap.description} path="roadmap.description" onEdit={onEdit} as="span" />
+                </p>
+              </div>
+              <div className="grid md:grid-cols-3 gap-5">
+                {content.roadmap.items.map((item, i) => {
+                  const isDone = item.status === 'completed';
+                  const isInProgress = item.status === 'in-progress';
+                  const badgeColor = isDone
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                    : isInProgress
+                    ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                    : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30';
+                  const statusLabel = isDone ? 'Completed' : isInProgress ? 'In Progress' : 'Planned';
+                  return (
+                    <div key={i} className={`p-6 relative flex flex-col justify-between ${cardCls}`}>
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold ${isTerminal ? 'bg-green-500/20 text-green-300' : isBrutal ? 'bg-black text-white' : 'bg-white/10 text-white'}`}>
+                            <Editable value={item.phase} path={`roadmap.items.${i}.phase`} onEdit={onEdit} />
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${badgeColor}`}>
+                            {statusLabel}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-base mb-2">
+                          <Editable value={item.title} path={`roadmap.items.${i}.title`} onEdit={onEdit} />
+                        </h3>
+                        <p className={`text-xs leading-relaxed ${muted}`}>
+                          <Editable value={item.desc} path={`roadmap.items.${i}.desc`} onEdit={onEdit} as="span" />
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           ) : null;
