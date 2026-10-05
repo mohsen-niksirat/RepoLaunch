@@ -35,10 +35,11 @@ interface StudioState {
   setAccent: (c: string) => void;
   setLanguage: (lang: LanguageCode) => void;
   translateContent: (lang: LanguageCode) => Promise<void>;
-  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials' | 'showRoadmap' | 'showVideoEmbed') => void;
+  toggleSection: (k: 'showTerminal' | 'showScreenshots' | 'showFaq' | 'showTechStack' | 'showNewsletter' | 'showChangelog' | 'showStarHistory' | 'showPricing' | 'showTestimonials' | 'showRoadmap' | 'showVideoEmbed' | 'showComments') => void;
   setNewsletterEndpoint: (endpoint: string) => void;
   setAnalytics: (analytics?: import('../types').AnalyticsConfig) => void;
   setCustomDomain: (domain: string) => void;
+  setGiscus: (giscus?: import('../types').GiscusConfig) => void;
   moveSection: (id: import('../types').SectionId, direction: 'up' | 'down') => void;
   generate: (url: string) => Promise<void>;
   loadMock: (key: string) => void;
@@ -78,8 +79,9 @@ export const useStudio = create<StudioState>()(
         showTestimonials: true,
         showRoadmap: true,
         showVideoEmbed: true,
+        showComments: true,
         newsletterEndpoint: '',
-        sectionOrder: ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'],
+        sectionOrder: ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter', 'comments'],
       },
       device: 'desktop',
       settingsOpen: false,
@@ -126,9 +128,10 @@ export const useStudio = create<StudioState>()(
       setNewsletterEndpoint: (endpoint) => set((s) => ({ theme: { ...s.theme, newsletterEndpoint: endpoint } })),
       setAnalytics: (analytics) => set((s) => ({ theme: { ...s.theme, analytics } })),
       setCustomDomain: (domain) => set((s) => ({ theme: { ...s.theme, customDomain: domain } })),
+      setGiscus: (giscus) => set((s) => ({ theme: { ...s.theme, giscus } })),
       moveSection: (id, direction) => {
         set((state) => {
-          const currentOrder = state.theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];
+          const currentOrder = state.theme.sectionOrder || ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter', 'comments'];
           const order = [...currentOrder];
           const idx = order.indexOf(id);
           if (idx === -1) return state;
@@ -183,7 +186,7 @@ export const useStudio = create<StudioState>()(
           const defaultSections: import('../types').SectionId[] = [
             'showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart',
             'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials',
-            'pricing', 'faq', 'newsletter'
+            'pricing', 'faq', 'newsletter', 'comments'
           ];
           const persistedOrder: import('../types').SectionId[] = Array.isArray(persistedState.theme.sectionOrder)
             ? persistedState.theme.sectionOrder

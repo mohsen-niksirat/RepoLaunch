@@ -364,6 +364,37 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   </section>`
     : '';
 
+  const giscusRepo = theme.giscus?.repo || `${meta.owner}/${meta.name}`;
+  const commentsSection = theme.showComments !== false
+    ? `<section class="max-w-4xl mx-auto px-6 py-14">
+    <div class="rl-card p-6 md:p-8">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:20px;font-weight:700">Community Discussions & Feedback</h2>
+          <p style="font-size:13px;color:var(--muted)">Join the discussion or leave feedback via GitHub Discussions</p>
+        </div>
+        <a class="btn rl-btn-ghost !py-1.5 !px-3 !text-xs" href="${esc(meta.repoUrl)}/discussions" target="_blank" rel="noopener">${iconSvg('Github', 'w-3.5 h-3.5')} Open Discussions</a>
+      </div>
+      <div class="giscus"></div>
+      <script src="https://giscus.app/client.js"
+        data-repo="${esc(giscusRepo)}"
+        ${theme.giscus?.repoId ? `data-repo-id="${esc(theme.giscus.repoId)}"` : ''}
+        data-category="${esc(theme.giscus?.category || 'General')}"
+        ${theme.giscus?.categoryId ? `data-category-id="${esc(theme.giscus.categoryId)}"` : ''}
+        data-mapping="${esc(theme.giscus?.mapping || 'pathname')}"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="${theme.themeId === 'midnight-linear' ? 'transparent_dark' : theme.themeId === 'matrix-terminal' ? 'dark' : 'light'}"
+        data-lang="${esc(theme.language || 'en')}"
+        crossorigin="anonymous"
+        async>
+      </script>
+    </div>
+  </section>`
+    : '';
+
   const sectionMap: Record<string, string> = {
     showcase: screenshotsSection,
     videoEmbed: videoEmbedSection,
@@ -378,11 +409,12 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     pricing: pricingSection,
     faq: faqSection,
     newsletter: newsletterSection,
+    comments: commentsSection,
   };
 
   const order = theme.sectionOrder && theme.sectionOrder.length
     ? theme.sectionOrder
-    : ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter'];
+    : ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter', 'comments'];
 
   const renderedSections = order.map((k) => sectionMap[k] || '').filter(Boolean).join('\n\n');
 

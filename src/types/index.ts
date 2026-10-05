@@ -168,7 +168,18 @@ export type SectionId =
   | 'testimonials'
   | 'pricing'
   | 'faq'
-  | 'newsletter';
+  | 'newsletter'
+  | 'comments';
+
+export interface GiscusConfig {
+  enabled: boolean;
+  repo: string;
+  repoId?: string;
+  category?: string;
+  categoryId?: string;
+  mapping?: 'pathname' | 'url' | 'title' | 'og:title';
+  theme?: 'preferred_color_scheme' | 'dark' | 'light' | 'transparent_dark';
+}
 
 export interface AnalyticsConfig {
   provider: 'ga4' | 'plausible' | 'umami';
@@ -211,6 +222,8 @@ export interface ThemeConfig {
   showTestimonials?: boolean;
   showRoadmap?: boolean;
   showVideoEmbed?: boolean;
+  showComments?: boolean;
+  giscus?: GiscusConfig;
   newsletterEndpoint?: string;
   analytics?: AnalyticsConfig;
   customDomain?: string;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Zap, ShieldCheck, Rocket, Layers, Gauge, Globe, Plug, Boxes, Sparkles, Wrench,
-  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart, Milestone, Play,
+  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart, Milestone, Play, MessageSquare,
 } from 'lucide-react';
 import type { LandingPageContent, RepoMetadata, ThemeConfig } from '../types';
 import { renderStarHistorySvg } from '../services/starHistory';
@@ -601,6 +601,45 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                     {subscribed ? 'Subscribed! ✓' : (content.newsletter?.buttonText || 'Subscribe')}
                   </button>
                 </form>
+              </div>
+            </section>
+          ) : null;
+        }
+
+        if (sectionId === 'comments') {
+          return theme.showComments !== false ? (
+            <section key="comments" className="max-w-4xl mx-auto px-6 py-14">
+              <div className={`p-6 md:p-8 ${cardCls}`}>
+                <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: isTerminal ? '#0d2614' : `${accent}20`, color: isTerminal ? '#4ade80' : accent }}>
+                      <MessageSquare className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">Community Discussions & Feedback</h3>
+                      <p className={`text-xs ${muted}`}>Powered by GitHub Discussions (Giscus)</p>
+                    </div>
+                  </div>
+                  <a
+                    href={`${meta.repoUrl}/discussions`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg border inline-flex items-center gap-1.5 transition ${btnGhost}`}
+                  >
+                    <Github className="w-3.5 h-3.5" /> View Discussions on GitHub
+                  </a>
+                </div>
+                <div className="border border-dashed border-white/15 rounded-xl p-6 text-center bg-black/10">
+                  <p className="text-xs mb-2 text-zinc-300 font-medium">
+                    Live interactive comments powered by GitHub Discussions
+                  </p>
+                  <p className={`text-xs mb-3 ${muted}`}>
+                    Visitors can leave feedback, ask questions, and upvote with their GitHub accounts.
+                  </p>
+                  <span className="text-[11px] font-mono px-3 py-1 rounded bg-white/5 text-zinc-400">
+                    Repository target: {theme.giscus?.repo || `${meta.owner}/${meta.name}`}
+                  </span>
+                </div>
               </div>
             </section>
           ) : null;

@@ -487,7 +487,7 @@ export default function Studio() {
                 </button>
               </div>
               <div className="flex gap-1.5 flex-wrap">
-                {([['showScreenshots', 'Showcase'], ['showVideoEmbed', 'Video Demo'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showRoadmap', 'Roadmap'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist']] as const).map(([k, label]) => (
+                {([['showScreenshots', 'Showcase'], ['showVideoEmbed', 'Video Demo'], ['showTerminal', 'Quickstart'], ['showStarHistory', 'Stars Chart'], ['showChangelog', 'Releases'], ['showRoadmap', 'Roadmap'], ['showTechStack', 'Tech Stack'], ['showTestimonials', 'Testimonials'], ['showPricing', 'Pricing'], ['showFaq', 'FAQ'], ['showNewsletter', 'Waitlist'], ['showComments', 'Discussions']] as const).map(([k, label]) => (
                   <button
                     key={k}
                     onClick={() => s.toggleSection(k)}
@@ -587,7 +587,7 @@ export default function Studio() {
             <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">Section Layout & Ordering</h3>
             <p className="text-xs text-zinc-400 mb-3">Reorder sections on your landing page. Changes apply instantly to preview and exports.</p>
             <div className="space-y-1.5 mb-6">
-              {(s.theme.sectionOrder || ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter']).map((sectionId, idx, arr) => {
+              {(s.theme.sectionOrder || ['showcase', 'videoEmbed', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'roadmap', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter', 'comments']).map((sectionId, idx, arr) => {
                 const labels: Record<SectionId, string> = {
                   showcase: 'Screenshot / Showcase',
                   videoEmbed: 'Video Demo / Walkthrough',
@@ -602,6 +602,7 @@ export default function Studio() {
                   pricing: 'Pricing / GitHub Sponsors',
                   faq: 'Frequently Asked Questions',
                   newsletter: 'Waitlist / Lead Capture Form',
+                  comments: 'GitHub Discussions & Comments',
                 };
                 return (
                   <div key={sectionId} className="flex items-center justify-between bg-[#151524] border border-white/15 rounded-lg px-3 py-2 text-sm">
@@ -692,6 +693,24 @@ export default function Studio() {
                 Points CNAME automatically to GitHub Pages. Remember to configure DNS: A records (185.199.108.153) or CNAME ({s.meta?.owner || 'owner'}.github.io).
               </p>
             )}
+
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-3">GitHub Discussions (Comments)</h3>
+            <label className="block text-sm mb-1.5">Repository <span className="text-zinc-500 font-normal">(owner/repo)</span></label>
+            <input
+              type="text"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-3 font-mono placeholder:text-zinc-500"
+              placeholder={s.meta ? `${s.meta.owner}/${s.meta.name}` : 'owner/repo'}
+              value={s.theme.giscus?.repo ?? ''}
+              onChange={(e) => s.setGiscus({ enabled: true, repo: e.target.value, category: s.theme.giscus?.category, repoId: s.theme.giscus?.repoId, categoryId: s.theme.giscus?.categoryId })}
+            />
+            <label className="block text-sm mb-1.5">Discussions Category <span className="text-zinc-500 font-normal">(e.g. Announcements or General)</span></label>
+            <input
+              type="text"
+              className="w-full bg-[#151524] text-zinc-100 border border-white/20 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/60 mb-5 font-mono placeholder:text-zinc-500"
+              placeholder="Announcements"
+              value={s.theme.giscus?.category ?? ''}
+              onChange={(e) => s.setGiscus({ enabled: true, repo: s.theme.giscus?.repo || (s.meta ? `${s.meta.owner}/${s.meta.name}` : ''), category: e.target.value, repoId: s.theme.giscus?.repoId, categoryId: s.theme.giscus?.categoryId })}
+            />
 
             {aiMsg && <p className="text-sm mt-4 text-indigo-300">{aiMsg}</p>}
           </div>
