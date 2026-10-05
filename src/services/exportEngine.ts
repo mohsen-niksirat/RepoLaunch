@@ -27,6 +27,7 @@ const LUCIDE_PATHS: Record<string, string> = {
   Check: '<polyline points="20 6 9 17 4 12"/>',
   Heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
   Quote: '<path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>',
+  RotateCcw: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
 };
 
 function iconSvg(name: string, cls: string): string {
@@ -128,21 +129,66 @@ function themeTokens(theme: ThemeConfig): { css: string; bodyCls: string } {
 
 function quickstartScript(): string {
   return `
+function rlType(el, text) {
+  if (!el) return;
+  el.textContent = '';
+  var i = 0;
+  var cur = document.createElement('span');
+  cur.className = 'rl-cursor';
+  cur.textContent = '▋';
+  el.appendChild(cur);
+  var t = setInterval(function() {
+    cur.remove();
+    el.textContent = text.slice(0, i + 1);
+    el.appendChild(cur);
+    i++;
+    if (i >= text.length) clearInterval(t);
+  }, 16);
+}
+
+var firstP = document.querySelector('.rl-quickstart [data-panel]:not([hidden])');
+if (firstP) {
+  var c = firstP.querySelector('code');
+  var raw = firstP.getAttribute('data-raw') || (c ? c.textContent.trim() : '');
+  if (c && raw) rlType(c, raw);
+}
+
 document.querySelectorAll('.rl-tabs').forEach(function(wrap){
   wrap.addEventListener('click', function(e){
     var b = e.target.closest('button[data-tab]'); if(!b) return;
     var box = wrap.closest('.rl-quickstart');
     var tabId = b.getAttribute('data-tab');
-    box.querySelectorAll('[data-panel]').forEach(function(p){p.hidden = p.getAttribute('data-panel')!==tabId;});
+    box.querySelectorAll('[data-panel]').forEach(function(p){
+      var isT = p.getAttribute('data-panel')===tabId;
+      p.hidden = !isT;
+      if (isT) {
+        var cd = p.querySelector('code');
+        var rw = p.getAttribute('data-raw') || (cd ? cd.textContent.trim() : '');
+        if (cd && rw) rlType(cd, rw);
+      }
+    });
     wrap.querySelectorAll('button[data-tab]').forEach(function(x){x.classList.toggle('rl-tab-active', x===b);});
   });
 });
+
 document.addEventListener('click', function(e){
+  var rep = e.target.closest('[data-replay]');
+  if (rep) {
+    var bx = rep.closest('.rl-quickstart');
+    var ap = bx ? bx.querySelector('[data-panel]:not([hidden])') : null;
+    if (ap) {
+      var cd = ap.querySelector('code');
+      var rw = ap.getAttribute('data-raw') || (cd ? cd.textContent.trim() : '');
+      if (cd && rw) rlType(cd, rw);
+    }
+    return;
+  }
   var btn = e.target.closest('[data-copy]'); if(!btn) return;
   var box = btn.closest('.rl-quickstart');
-  var pre = box ? box.querySelector('[data-panel]:not([hidden]) code') : document.querySelector('.rl-quickstart [data-panel]:not([hidden]) code');
-  if(!pre) return;
-  navigator.clipboard.writeText(pre.textContent.trim()).then(function(){
+  var p = box ? box.querySelector('[data-panel]:not([hidden])') : document.querySelector('.rl-quickstart [data-panel]:not([hidden])');
+  var text = p ? (p.getAttribute('data-raw') || (p.querySelector('code') ? p.querySelector('code').textContent.trim() : '')) : '';
+  if(!text) return;
+  navigator.clipboard.writeText(text.trim()).then(function(){
     var lbl = btn.querySelector('span');
     if(lbl){
       var old = lbl.textContent;
@@ -208,7 +254,7 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     .join('');
   const panels = content.quickstart
     .map(
-      (t, i) => `<div data-panel="t${i}" ${i ? 'hidden' : ''}><pre class="overflow-x-auto"><code>${esc(t.command)}</code></pre></div>`
+      (t, i) => `<div data-panel="t${i}" data-raw="${esc(t.command)}" ${i ? 'hidden' : ''}><div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:8px;user-select:none">${iconSvg('Terminal', 'w-3 h-3')}<span>bash</span></div><pre class="overflow-x-auto"><span style="color:var(--accent);margin-right:8px;font-weight:bold;user-select:none">$</span><code>${esc(t.command)}</code></pre></div>`
     )
     .join('');
 
@@ -238,11 +284,14 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
     ? `<section class="rl-quickstart max-w-3xl mx-auto px-6 py-16">
     <h2 class="text-2xl md:text-3xl font-bold text-center mb-8">Get started in seconds</h2>
     <div class="rl-code overflow-hidden">
-      <div class="flex items-center justify-between px-4 pt-2">
+      <div class="flex items-center justify-between px-4 pt-2 border-b border-white/5 pb-2" style="border-bottom:1px solid var(--border)">
         <div class="flex rl-tabs" role="tablist">${tabs}</div>
-        <button data-copy="t0" class="flex items-center gap-1.5 text-xs px-2 py-1 rounded-md opacity-70 hover:opacity-100">${iconSvg('Copy', 'w-3.5 h-3.5')}<span>Copy</span></button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button data-replay class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md opacity-75 hover:opacity-100 transition" title="Replay typing animation">${iconSvg('RotateCcw', 'w-3.5 h-3.5')}<span>Replay</span></button>
+          <button data-copy class="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md opacity-75 hover:opacity-100 transition">${iconSvg('Copy', 'w-3.5 h-3.5')}<span>Copy</span></button>
+        </div>
       </div>
-      <div class="px-4 pb-4 pt-2 text-sm font-mono">${panels}</div>
+      <div class="p-5 text-sm font-mono">${panels}</div>
     </div>
   </section>`
     : '';
@@ -564,6 +613,8 @@ nav .inner{display:flex;align-items:center;justify-content:space-between;padding
 footer{border-top:1px solid var(--border);margin-top:60px;padding:28px 24px;text-align:center;font-size:14px;color:var(--muted)}
 footer a{opacity:.8}footer a:hover{opacity:1;text-decoration:underline}
 .cta-banner{max-width:880px;margin:0 auto;padding:48px 32px;text-align:center}
+.rl-cursor{display:inline-block;animation:rl-blink 1s infinite;color:var(--accent);margin-left:2px;font-weight:700}
+@keyframes rl-blink{0%,100%{opacity:1}50%{opacity:0}}
 ${css}
 </style>
 </head>

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Zap, ShieldCheck, Rocket, Layers, Gauge, Globe, Plug, Boxes, Sparkles, Wrench,
-  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart, Milestone, Play, MessageSquare,
+  Copy, Star, ChevronDown, Github, ArrowRight, Check, Quote, Heart, Milestone, Play, MessageSquare, RotateCcw, Terminal,
 } from 'lucide-react';
 import type { LandingPageContent, RepoMetadata, ThemeConfig } from '../types';
 import { renderStarHistorySvg } from '../services/starHistory';
@@ -115,8 +115,36 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
     ? 'text-zinc-400'
     : 'text-gray-500';
 
+  const currentCommand = content.quickstart[tab]?.command ?? '';
+  const [displayedCommand, setDisplayedCommand] = useState(currentCommand);
+
+  useEffect(() => {
+    let i = 0;
+    setDisplayedCommand('');
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedCommand(currentCommand.slice(0, i));
+      if (i >= currentCommand.length) {
+        clearInterval(interval);
+      }
+    }, 16);
+    return () => clearInterval(interval);
+  }, [tab, currentCommand]);
+
+  const replayTypewriter = () => {
+    let i = 0;
+    setDisplayedCommand('');
+    const interval = setInterval(() => {
+      i++;
+      setDisplayedCommand(currentCommand.slice(0, i));
+      if (i >= currentCommand.length) {
+        clearInterval(interval);
+      }
+    }, 16);
+  };
+
   const copyCmd = () => {
-    navigator.clipboard.writeText(content.quickstart[tab]?.command ?? '').then(() => {
+    navigator.clipboard.writeText(currentCommand).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1400);
     });
@@ -309,24 +337,47 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
             <section key="quickstart" className="max-w-3xl mx-auto px-6 py-12">
               <h2 className="text-3xl font-extrabold text-center mb-8 tracking-tight">Get started in seconds</h2>
               <div className={isBrutal ? 'rounded-[10px] border-2 border-black bg-black shadow-[6px_6px_0_var(--acc)]' : isTerminal ? 'rounded-md border border-green-700 bg-[#020604] shadow-[0_0_20px_rgba(34,197,94,0.15)]' : isBento ? 'rounded-2xl border border-white/10 bg-[#06070a] shadow-2xl' : isMidnight ? 'rounded-2xl border border-white/10 bg-black/50' : 'rounded-2xl bg-gray-900'} style={isBrutal ? { ['--acc' as any]: accent } : undefined}>
-                <div className="flex items-center justify-between px-4 pt-3">
+                <div className="flex items-center justify-between px-4 pt-3 border-b border-white/5 pb-2">
                   <div className="flex gap-1 flex-wrap">
                     {content.quickstart.map((t, i) => (
                       <button
                         key={i}
                         onClick={() => setTab(i)}
-                        className={`px-4 py-2 rounded-lg text-sm font-mono ${i === tab ? (isBrutal ? `bg-[var(--acc)] border-2 border-black` : isTerminal ? 'bg-green-500 text-black font-bold' : 'bg-white/10 text-white') : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-mono transition ${i === tab ? (isBrutal ? `bg-[var(--acc)] border-2 border-black` : isTerminal ? 'bg-green-500 text-black font-bold' : 'bg-white/10 text-white shadow-sm') : 'text-zinc-500 hover:text-zinc-300'}`}
                         style={i === tab && isBrutal ? { ['--acc' as any]: accent, color: '#111' } : undefined}
                       >
                         {t.label}
                       </button>
                     ))}
                   </div>
-                  <button onClick={copyCmd} className="text-xs px-2 py-1 rounded-md text-zinc-400 hover:text-white flex items-center gap-1.5 font-mono">
-                    {copied ? <><Check className="w-3.5 h-3.5" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={replayTypewriter}
+                      className="text-xs px-2.5 py-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5 font-mono transition"
+                      title="Replay typing effect"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Replay</span>
+                    </button>
+                    <button
+                      onClick={copyCmd}
+                      className="text-xs px-2.5 py-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5 font-mono transition"
+                    >
+                      {copied ? <><Check className="w-3.5 h-3.5 text-emerald-400" /> Copied!</> : <><Copy className="w-3.5 h-3.5" /> Copy</>}
+                    </button>
+                  </div>
                 </div>
-                <pre className="px-5 pb-5 pt-3 overflow-x-auto text-sm font-mono text-zinc-200 whitespace-pre">{content.quickstart[tab]?.command}</pre>
+                <div className="p-5 overflow-x-auto text-sm font-mono text-zinc-200">
+                  <div className="flex items-center gap-2 text-zinc-500 text-xs mb-2 select-none">
+                    <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>bash — interactive terminal</span>
+                  </div>
+                  <pre className="whitespace-pre flex items-start">
+                    <span className="text-emerald-400 mr-2.5 font-bold select-none">$</span>
+                    <span className="flex-1">{displayedCommand}</span>
+                    <span className="animate-pulse inline-block w-2 h-4 bg-emerald-400 ml-1 self-center select-none" />
+                  </pre>
+                </div>
               </div>
             </section>
           ) : null;
