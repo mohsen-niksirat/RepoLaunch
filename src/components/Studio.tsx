@@ -4,7 +4,7 @@ import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
 import LandingPreview from './LandingPreview';
-import { generateStandaloneHTML, generateReactComponent, generateNextJsAppRouter, generateAstroPage, generateDeployReadme } from '../services/exportEngine';
+import { generateStandaloneHTML, generateReactComponent, generateNextJsAppRouter, generateAstroPage, generateDeployReadme, generateFaviconSvg, generateManifestJson } from '../services/exportEngine';
 import { enhanceWithAI } from '../services/aiGenerator';
 import { generateOgImageBlob } from '../services/ogGenerator';
 import { publishToGitHubPages } from '../services/ghPagesPublisher';
@@ -209,6 +209,8 @@ export default function Studio() {
     zip.file('LandingPage.tsx', generateReactComponent(s.meta, s.content, s.theme));
     zip.file('page.tsx', generateNextJsAppRouter(s.meta, s.content, s.theme));
     zip.file('index.astro', generateAstroPage(s.meta, s.content, s.theme));
+    zip.file('favicon.svg', generateFaviconSvg(s.meta, s.theme));
+    zip.file('site.webmanifest', generateManifestJson(s.meta, s.content, s.theme));
     zip.file('README.md', generateDeployReadme(s.meta, s.theme.customDomain));
     if (s.theme.customDomain?.trim()) {
       zip.file('CNAME', s.theme.customDomain.trim());

@@ -139,12 +139,49 @@ document.querySelectorAll('.rl-faq-item > button').forEach(function(b){
 });`;
 }
 
+export function generateFaviconSvg(meta: RepoMetadata, theme: ThemeConfig): string {
+  const initial = (meta.name || 'R').charAt(0).toUpperCase();
+  const accent = theme.accentColor || '#818cf8';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="rl-fav-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${accent}" />
+      <stop offset="100%" stop-color="#4f46e5" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#rl-fav-grad)" />
+  <text x="32" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="34" fill="#ffffff" text-anchor="middle">${initial}</text>
+</svg>`;
+}
+
+export function generateManifestJson(meta: RepoMetadata, content: LandingPageContent, theme: ThemeConfig): string {
+  return JSON.stringify({
+    name: `${meta.name} — ${content.hero.headline}`,
+    short_name: meta.name,
+    description: content.hero.subheadline,
+    start_url: './',
+    display: 'standalone',
+    background_color: theme.themeId === 'midnight-linear' ? '#0a0a12' : theme.themeId === 'matrix-terminal' ? '#050d08' : '#ffffff',
+    theme_color: theme.accentColor || '#818cf8',
+    icons: [
+      {
+        src: './favicon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+        purpose: 'any maskable'
+      }
+    ]
+  }, null, 2);
+}
+
 /** Generate a complete, self-contained standalone HTML page. */
 export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageContent, theme: ThemeConfig): string {
   const { css, bodyCls } = themeTokens(theme);
   const h = content.hero;
   const isRtl = theme.language === 'fa';
   const langCode = theme.language || 'en';
+  const faviconSvg = generateFaviconSvg(meta, theme);
+  const faviconDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(faviconSvg)}`;
 
   const tabs = content.quickstart
     .map((t, i) => `<button data-tab="t${i}" class="rl-tab px-4 py-2 text-sm border-b-2 border-transparent font-medium ${i === 0 ? 'rl-tab-active' : ''}">${esc(t.label)}</button>`)
@@ -442,6 +479,9 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="theme-color" content="${esc(theme.accentColor || '#818cf8')}"/>
+<link rel="icon" type="image/svg+xml" href="${faviconDataUri}"/>
+<link rel="manifest" href="./site.webmanifest"/>
 <title>${esc(meta.name)} — ${esc(h.headline)}</title>
 <meta name="description" content="${esc(h.subheadline)}"/>
 <link rel="canonical" href="${esc(meta.homepage || meta.repoUrl)}"/>
