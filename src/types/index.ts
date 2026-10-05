@@ -153,7 +153,7 @@ export interface LandingPageContent {
   videoEmbed?: VideoEmbedContent;
 }
 
-export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal';
+export type ThemeId = 'midnight-linear' | 'neo-brutalist' | 'clean-minimal' | 'matrix-terminal' | 'bento-modern';
 
 export type SectionId =
   | 'showcase'

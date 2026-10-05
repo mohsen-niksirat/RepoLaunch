@@ -14,6 +14,7 @@ import type { ThemeId, SectionId, LanguageCode } from '../types';
 import { SUPPORTED_LANGUAGES } from '../types';
 
 const THEMES: { id: ThemeId; label: string }[] = [
+  { id: 'bento-modern', label: 'Bento' },
   { id: 'midnight-linear', label: 'Midnight' },
   { id: 'neo-brutalist', label: 'Brutalist' },
   { id: 'clean-minimal', label: 'Minimal' },

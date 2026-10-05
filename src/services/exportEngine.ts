@@ -36,6 +36,26 @@ function iconSvg(name: string, cls: string): string {
 
 function themeTokens(theme: ThemeConfig): { css: string; bodyCls: string } {
   const accent = theme.accentColor;
+  if (theme.themeId === 'bento-modern') {
+    return {
+      bodyCls: 'rl-bento',
+      css: `
+.rl-bento{--bg:#0b0d14;--fg:#f1f5f9;--muted:#94a3b8;--card:rgba(18,22,34,.75);--border:rgba(255,255,255,.08);--accent:${accent};
+ background:radial-gradient(ellipse 80% 50% at 50% -20%,${accent}26,transparent),#0b0d14;color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,sans-serif;}
+.rl-card{background:var(--card);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 20px 40px -15px rgba(0,0,0,.5);transition:all .3s cubic-bezier(0.16,1,0.3,1)}
+.rl-card:hover{border-color:${accent}88;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 20px 40px -10px ${accent}33;transform:translateY(-3px)}
+.rl-eyebrow{border:1px solid ${accent}40;background:linear-gradient(135deg,${accent}22,${accent}08);color:${accent};border-radius:9999px}
+.rl-btn-primary{background:linear-gradient(135deg,${accent},#4f46e5);color:#fff;border-radius:12px;font-weight:600;box-shadow:0 4px 20px -2px ${accent}66;transition:all .2s}
+.rl-btn-primary:hover{filter:brightness(1.15);transform:translateY(-1px);box-shadow:0 6px 24px -2px ${accent}88}
+.rl-btn-ghost{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);backdrop-filter:blur(8px);border-radius:12px}
+.rl-btn-ghost:hover{border-color:${accent}88;background:${accent}15}
+.rl-code{background:#06070a;border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:inset 0 2px 4px rgba(0,0,0,.6)}
+.rl-tab-active{color:#fff;background:${accent}22;border:1px solid ${accent}66;border-radius:8px}
+.rl-bento-hero{background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,0) 100%)}
+.rl-bento-span-2{grid-column:span 2 / span 2}
+@media (max-width:768px){.rl-bento-span-2{grid-column:span 1 / span 1}}`,
+    };
+  }
   if (theme.themeId === 'midnight-linear') {
     return {
       bodyCls: 'rl-midnight',
@@ -161,7 +181,7 @@ export function generateManifestJson(meta: RepoMetadata, content: LandingPageCon
     description: content.hero.subheadline,
     start_url: './',
     display: 'standalone',
-    background_color: theme.themeId === 'midnight-linear' ? '#0a0a12' : theme.themeId === 'matrix-terminal' ? '#050d08' : '#ffffff',
+    background_color: theme.themeId === 'bento-modern' ? '#0b0d14' : theme.themeId === 'midnight-linear' ? '#0a0a12' : theme.themeId === 'matrix-terminal' ? '#050d08' : '#ffffff',
     theme_color: theme.accentColor || '#818cf8',
     icons: [
       {
@@ -194,8 +214,11 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 
   const features = content.features
     .map(
-      (f) => `<div class="rl-card p-6"><div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style="background:var(--accent);color:${theme.themeId === 'midnight-linear' ? '#0a0a12' : theme.themeId === 'neo-brutalist' ? '#fff' : '#fff'}">${iconSvg(f.icon, 'w-5 h-5')}</div>
-<h3 class="text-lg font-semibold mb-1">${esc(f.title)}</h3><p class="text-sm" style="color:var(--muted)">${esc(f.desc)}</p></div>`
+      (f, i) => {
+        const spanCls = theme.themeId === 'bento-modern' && (i === 0 || i === 3) ? ' rl-bento-span-2' : '';
+        return `<div class="rl-card p-6${spanCls}"><div class="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style="background:var(--accent);color:${theme.themeId === 'midnight-linear' ? '#0a0a12' : '#fff'}">${iconSvg(f.icon, 'w-5 h-5')}</div>
+<h3 class="text-lg font-semibold mb-1">${esc(f.title)}</h3><p class="text-sm" style="color:var(--muted)">${esc(f.desc)}</p></div>`;
+      }
     )
     .join('');
 

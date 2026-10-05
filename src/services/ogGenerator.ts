@@ -15,6 +15,7 @@ export function generateOgCanvas(
   const isDark = theme.themeId === 'midnight-linear';
   const isBrutal = theme.themeId === 'neo-brutalist';
   const isTerminal = theme.themeId === 'matrix-terminal';
+  const isBento = theme.themeId === 'bento-modern';
 
   // 1. Background
   if (isBrutal) {
@@ -36,6 +37,19 @@ export function generateOgCanvas(
     for (let y = 20; y < 620; y += 8) {
       ctx.fillRect(20, y, 1160, 4);
     }
+  } else if (isBento) {
+    ctx.fillStyle = '#0b0d14';
+    ctx.fillRect(0, 0, 1200, 630);
+
+    const radial = ctx.createRadialGradient(600, -50, 10, 600, -50, 650);
+    radial.addColorStop(0, `${accent}40`);
+    radial.addColorStop(1, 'transparent');
+    ctx.fillStyle = radial;
+    ctx.fillRect(0, 0, 1200, 630);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(30, 30, 1140, 570);
   } else if (isDark) {
     ctx.fillStyle = '#0a0a14';
     ctx.fillRect(0, 0, 1200, 630);
@@ -78,21 +92,21 @@ export function generateOgCanvas(
   // 2. Top Eyebrow / Repo owner
   ctx.save();
   ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillStyle = isBrutal ? '#111111' : isTerminal ? '#22c55e' : isDark ? `${accent}` : accent;
+  ctx.fillStyle = isBrutal ? '#111111' : isTerminal ? '#22c55e' : isBento ? accent : isDark ? `${accent}` : accent;
   ctx.fillText(`${meta.owner} /`, 80, 100);
   ctx.restore();
 
   // 3. Project Title
   ctx.save();
   ctx.font = '800 64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillStyle = isBrutal ? '#111111' : isTerminal ? '#4ade80' : isDark ? '#ffffff' : '#0f172a';
+  ctx.fillStyle = isBrutal ? '#111111' : isTerminal ? '#4ade80' : (isDark || isBento) ? '#ffffff' : '#0f172a';
   ctx.fillText(meta.name, 80, 175);
   ctx.restore();
 
   // 4. Headline / Slogan
   ctx.save();
   ctx.font = '500 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillStyle = isBrutal ? '#333333' : isTerminal ? '#86efac' : isDark ? '#cbd5e1' : '#334155';
+  ctx.fillStyle = isBrutal ? '#333333' : isTerminal ? '#86efac' : isBento ? '#94a3b8' : isDark ? '#cbd5e1' : '#334155';
   
   // Word wrap headline into max 2 lines
   const words = (content.hero.headline || meta.description || '').split(' ');
@@ -156,13 +170,13 @@ export function generateOgCanvas(
       ctx.strokeRect(badgeX, badgesY, badgeW, badgeH);
       ctx.fillStyle = '#4ade80';
       ctx.fillText(`${b.label}  ${b.text}`, badgeX + paddingX, badgesY + 32);
-    } else if (isDark) {
-      // Midnight glass badge
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+    } else if (isBento || isDark) {
+      // Bento / Midnight glass badge
+      ctx.fillStyle = isBento ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.06)';
       ctx.beginPath();
-      ctx.roundRect(badgeX, badgesY, badgeW, badgeH, 12);
+      ctx.roundRect(badgeX, badgesY, badgeW, badgeH, 14);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.strokeStyle = isBento ? 'rgba(255, 255, 255, 0.16)' : 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 1;
       ctx.stroke();
       ctx.fillStyle = '#f1f5f9';

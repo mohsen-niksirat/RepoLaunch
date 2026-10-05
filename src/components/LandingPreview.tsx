@@ -58,10 +58,13 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
   const isMidnight = theme.themeId === 'midnight-linear';
   const isBrutal = theme.themeId === 'neo-brutalist';
   const isTerminal = theme.themeId === 'matrix-terminal';
+  const isBento = theme.themeId === 'bento-modern';
 
   // theme class tokens (mirrors exportEngine)
   const shell =
-    theme.themeId === 'midnight-linear'
+    theme.themeId === 'bento-modern'
+      ? { background: `radial-gradient(ellipse 80% 50% at 50% -20%, ${theme.accentColor}26, transparent), #0b0d14`, color: '#f1f5f9' }
+      : theme.themeId === 'midnight-linear'
       ? { background: `radial-gradient(1000px 500px at 50% -10%, ${theme.accentColor}22, transparent 60%), #0a0a12`, color: '#e7e7ef' }
       : theme.themeId === 'neo-brutalist'
       ? { background: '#fff8e7', color: '#111' }
@@ -73,6 +76,8 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
     ? 'bg-white border-2 border-black rounded-[10px] shadow-[6px_6px_0_#111] hover:-translate-y-0.5 hover:shadow-[9px_9px_0_#111] transition'
     : isTerminal
     ? 'bg-[#091b10] border border-green-800 rounded-md shadow-[0_0_15px_rgba(34,197,94,0.12)] hover:border-green-500 hover:shadow-[0_0_25px_rgba(34,197,94,0.25)] transition font-mono'
+    : isBento
+    ? 'bg-[#121622]/80 border border-white/[0.08] rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_20px_40px_-15px_rgba(0,0,0,0.5)] backdrop-blur-md hover:border-white/20 hover:-translate-y-1 transition-all duration-300'
     : isMidnight
     ? 'bg-white/[.04] border border-white/10 rounded-2xl backdrop-blur hover:border-indigo-400/40 hover:-translate-y-0.5 transition'
     : 'bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition';
@@ -81,6 +86,8 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
     ? 'bg-black text-white border-2 border-black shadow-[4px_4px_0_var(--acc)] hover:-translate-y-0.5'
     : isTerminal
     ? 'bg-green-500 text-black border border-green-400 font-bold hover:shadow-[0_0_15px_#22c55e] transition font-mono'
+    : isBento
+    ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:brightness-110 rounded-xl transition hover:-translate-y-0.5'
     : isMidnight
     ? 'text-zinc-950 font-semibold hover:brightness-110 shadow-lg'
     : 'bg-gray-900 text-white hover:bg-black shadow-md';
@@ -89,6 +96,8 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
     ? 'bg-white border-2 border-black shadow-[4px_4px_0_#111] hover:-translate-y-0.5 text-black'
     : isTerminal
     ? 'bg-[#07140a] border border-green-800 text-green-400 hover:border-green-500 hover:bg-[#0d2614] transition font-mono'
+    : isBento
+    ? 'border border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/10 hover:border-white/20 transition backdrop-blur rounded-xl'
     : isMidnight
     ? 'border border-white/15 bg-white/5 text-zinc-100 hover:bg-white/10 transition'
     : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 transition shadow-sm';
@@ -100,6 +109,8 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
     ? 'text-neutral-600'
     : isTerminal
     ? 'text-green-500/70 font-mono'
+    : isBento
+    ? 'text-slate-400'
     : isMidnight
     ? 'text-zinc-400'
     : 'text-gray-500';
@@ -127,6 +138,8 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
           ? 'border-black bg-[#fff8e7] text-black'
           : isTerminal
           ? 'border-green-800 bg-[#050d08]/85 text-green-400 font-mono'
+          : isBento
+          ? 'border-white/10 bg-[#0b0d14]/80 text-zinc-100'
           : isMidnight
           ? 'border-white/10 bg-[#0a0a12]/70 text-zinc-100'
           : 'border-gray-200 bg-white/80 text-gray-900'
@@ -244,7 +257,7 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
               <h2 className="text-3xl font-extrabold text-center mb-10 tracking-tight">Why {meta.name}?</h2>
               <div className="grid md:grid-cols-3 gap-5">
                 {content.features.map((f, i) => (
-                  <div key={i} className={`p-6 ${cardCls}`}>
+                  <div key={i} className={`p-6 ${cardCls} ${isBento && (i === 0 || i === 3) ? 'md:col-span-2' : ''}`}>
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: accent, color: iconColor }}>
                       <ThemeIcon name={f.icon} className={iconChip} />
                     </div>
@@ -271,7 +284,7 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                     <div
                       className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mb-4"
                       style={{
-                        background: isBrutal ? accent : isTerminal ? '#0d2614' : isMidnight ? `${accent}22` : '#f3f4f6',
+                        background: isBrutal ? accent : isTerminal ? '#0d2614' : isMidnight || isBento ? `${accent}22` : '#f3f4f6',
                         color: isBrutal ? '#111' : accent,
                         border: isBrutal ? '2px solid #111' : isTerminal ? '1px solid #15803d' : undefined
                       }}
@@ -295,7 +308,7 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
           return theme.showTerminal ? (
             <section key="quickstart" className="max-w-3xl mx-auto px-6 py-12">
               <h2 className="text-3xl font-extrabold text-center mb-8 tracking-tight">Get started in seconds</h2>
-              <div className={isBrutal ? 'rounded-[10px] border-2 border-black bg-black shadow-[6px_6px_0_var(--acc)]' : isTerminal ? 'rounded-md border border-green-700 bg-[#020604] shadow-[0_0_20px_rgba(34,197,94,0.15)]' : isMidnight ? 'rounded-2xl border border-white/10 bg-black/50' : 'rounded-2xl bg-gray-900'} style={isBrutal ? { ['--acc' as any]: accent } : undefined}>
+              <div className={isBrutal ? 'rounded-[10px] border-2 border-black bg-black shadow-[6px_6px_0_var(--acc)]' : isTerminal ? 'rounded-md border border-green-700 bg-[#020604] shadow-[0_0_20px_rgba(34,197,94,0.15)]' : isBento ? 'rounded-2xl border border-white/10 bg-[#06070a] shadow-2xl' : isMidnight ? 'rounded-2xl border border-white/10 bg-black/50' : 'rounded-2xl bg-gray-900'} style={isBrutal ? { ['--acc' as any]: accent } : undefined}>
                 <div className="flex items-center justify-between px-4 pt-3">
                   <div className="flex gap-1 flex-wrap">
                     {content.quickstart.map((t, i) => (
