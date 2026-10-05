@@ -189,7 +189,9 @@ export async function publishToGitHubPages(
     // May already be enabled
   }
 
-  const liveUrl = `https://${owner.toLowerCase()}.github.io/${repo.toLowerCase()}/`;
+  const liveUrl = customDomain?.trim()
+    ? (customDomain.trim().startsWith('http') ? customDomain.trim() : `https://${customDomain.trim()}`)
+    : `https://${owner.toLowerCase()}.github.io/${repo.toLowerCase()}/`;
   onProgress?.('Published successfully! 🎉');
 
   return {

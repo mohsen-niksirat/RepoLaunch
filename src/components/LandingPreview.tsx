@@ -163,10 +163,10 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
             style={isMidnight ? { background: accent, color: '#0a0a12' } : undefined}
             href={h.ctaPrimaryLink}
           >
-            {h.ctaPrimary} <ArrowRight className="w-4 h-4 inline ml-1" />
+            {h.ctaPrimary} <ArrowRight className={`w-4 h-4 inline ${isRtl ? 'mr-1 rotate-180' : 'ml-1'}`} />
           </a>
           <a className={`px-6 py-3 rounded-xl font-semibold ${btnGhost}`} href={h.ctaSecondaryLink} target="_blank" rel="noreferrer">
-            <Star className="w-4 h-4 inline mr-1" /> {h.ctaSecondary}
+            <Star className={`w-4 h-4 inline ${isRtl ? 'ml-1' : 'mr-1'}`} /> {h.ctaSecondary}
           </a>
         </div>
         <div className="flex gap-2.5 justify-center mt-7 flex-wrap">
@@ -179,7 +179,7 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
       </header>
 
       {/* Dynamic Ordered Sections */}
-      {(theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'techStack', 'faq']).map((sectionId) => {
+      {(theme.sectionOrder || ['showcase', 'features', 'howItWorks', 'quickstart', 'starHistory', 'changelog', 'techStack', 'testimonials', 'pricing', 'faq', 'newsletter']).map((sectionId) => {
         if (sectionId === 'showcase') {
           return theme.showScreenshots && content.screenshots && content.screenshots.length > 0 ? (
             <section key="showcase" className="max-w-5xl mx-auto px-6 -mt-2 mb-16">
@@ -305,7 +305,7 @@ export default function LandingPreview({ meta, content, theme, onEdit }: Props) 
                 </div>
                 <div
                   className="py-2"
-                  dangerouslySetInnerHTML={{ __html: renderStarHistorySvg(content.starHistory, accent, isTerminal) }}
+                  dangerouslySetInnerHTML={{ __html: renderStarHistorySvg(content.starHistory, accent, isTerminal, !isMidnight && !isTerminal) }}
                 />
               </div>
             </section>

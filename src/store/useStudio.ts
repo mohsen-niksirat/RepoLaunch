@@ -175,6 +175,29 @@ export const useStudio = create<StudioState>()(
     {
       name: 'repolaunch-studio',
       partialize: (s) => ({ githubToken: s.githubToken, aiConfig: s.aiConfig, theme: s.theme }),
+      merge: (persistedState: any, currentState: StudioState) => {
+        const merged = { ...currentState, ...(persistedState as any) };
+        if (persistedState?.theme) {
+          const defaultSections: import('../types').SectionId[] = [
+            'showcase', 'features', 'howItWorks', 'quickstart',
+            'starHistory', 'changelog', 'techStack', 'testimonials',
+            'pricing', 'faq', 'newsletter'
+          ];
+          const persistedOrder: import('../types').SectionId[] = Array.isArray(persistedState.theme.sectionOrder)
+            ? persistedState.theme.sectionOrder
+            : defaultSections;
+          const fullOrder = [...persistedOrder];
+          for (const sec of defaultSections) {
+            if (!fullOrder.includes(sec)) fullOrder.push(sec);
+          }
+          merged.theme = {
+            ...currentState.theme,
+            ...persistedState.theme,
+            sectionOrder: fullOrder,
+          };
+        }
+        return merged;
+      },
     }
   )
 );

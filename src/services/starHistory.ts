@@ -32,7 +32,7 @@ export function calculateStarHistory(meta: RepoMetadata): StarPoint[] {
 }
 
 /** Render a responsive SVG Star History Chart string */
-export function renderStarHistorySvg(points: StarPoint[], accentColor: string, isTerminal = false): string {
+export function renderStarHistorySvg(points: StarPoint[], accentColor: string, isTerminal = false, isLight = false): string {
   const width = 640;
   const height = 240;
   const padLeft = 60;
@@ -62,8 +62,9 @@ export function renderStarHistorySvg(points: StarPoint[], accentColor: string, i
   });
 
   const lineColor = isTerminal ? '#4ade80' : accentColor || '#818cf8';
-  const gridColor = isTerminal ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.08)';
-  const textColor = isTerminal ? '#22c55e' : '#9ca3af';
+  const gridColor = isTerminal ? 'rgba(34,197,94,0.15)' : isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+  const textColor = isTerminal ? '#22c55e' : isLight ? '#4b5563' : '#9ca3af';
+  const circleStroke = isTerminal ? '#050d08' : isLight ? '#ffffff' : '#0a0a12';
 
   return `<svg viewBox="0 0 ${width} ${height}" class="w-full h-auto overflow-visible select-none" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -94,7 +95,7 @@ export function renderStarHistorySvg(points: StarPoint[], accentColor: string, i
     .map(
       (pt) => `
     <g class="cursor-pointer">
-      <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="${lineColor}" stroke="#0a0a12" stroke-width="2"/>
+      <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="${lineColor}" stroke="${circleStroke}" stroke-width="2"/>
       <text x="${pt.x}" y="${padTop + chartH + 20}" fill="${textColor}" font-size="11" font-family="monospace" text-anchor="middle">${pt.date}</text>
       <text x="${pt.x}" y="${pt.y - 12}" fill="${lineColor}" font-size="11" font-weight="bold" font-family="monospace" text-anchor="middle">${pt.stars.toLocaleString()}</text>
     </g>
