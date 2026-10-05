@@ -4,7 +4,7 @@ import confetti from 'canvas-confetti';
 import JSZip from 'jszip';
 import { useStudio } from '../store/useStudio';
 import LandingPreview from './LandingPreview';
-import { generateStandaloneHTML, generateReactComponent, generateDeployReadme } from '../services/exportEngine';
+import { generateStandaloneHTML, generateReactComponent, generateNextJsAppRouter, generateAstroPage, generateDeployReadme } from '../services/exportEngine';
 import { enhanceWithAI } from '../services/aiGenerator';
 import { generateOgImageBlob } from '../services/ogGenerator';
 import { publishToGitHubPages } from '../services/ghPagesPublisher';
@@ -177,6 +177,20 @@ export default function Studio() {
     celebrate();
   };
 
+  const doExportNextJs = () => {
+    if (!s.meta || !s.content) return;
+    const code = generateNextJsAppRouter(s.meta, s.content, s.theme);
+    download('page.tsx', new Blob([code], { type: 'text/plain' }));
+    celebrate();
+  };
+
+  const doExportAstro = () => {
+    if (!s.meta || !s.content) return;
+    const code = generateAstroPage(s.meta, s.content, s.theme);
+    download('index.astro', new Blob([code], { type: 'text/plain' }));
+    celebrate();
+  };
+
   const doExportOG = async () => {
     if (!s.meta || !s.content) return;
     try {
@@ -193,6 +207,8 @@ export default function Studio() {
     const zip = new JSZip();
     zip.file('index.html', generateStandaloneHTML(s.meta, s.content, s.theme));
     zip.file('LandingPage.tsx', generateReactComponent(s.meta, s.content, s.theme));
+    zip.file('page.tsx', generateNextJsAppRouter(s.meta, s.content, s.theme));
+    zip.file('index.astro', generateAstroPage(s.meta, s.content, s.theme));
     zip.file('README.md', generateDeployReadme(s.meta, s.theme.customDomain));
     if (s.theme.customDomain?.trim()) {
       zip.file('CNAME', s.theme.customDomain.trim());
@@ -394,8 +410,14 @@ export default function Studio() {
             <button onClick={() => { setPublishModalOpen(true); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-emerald-500/10 text-sm text-left text-emerald-300 font-medium">
               <Globe className="w-4 h-4 text-emerald-400" /> Publish to GitHub Pages <span className="text-xs text-emerald-400/80 ml-auto">1-Click</span>
             </button>
-            <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
-              <Sparkles className="w-4 h-4 text-fuchsia-400" /> React component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
+            <button onClick={() => { doExportJSX(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 text-sm text-left">
+              <Sparkles className="w-4 h-4 text-fuchsia-400" /> React Component <span className="text-xs text-zinc-500 ml-auto">.tsx</span>
+            </button>
+            <button onClick={() => { doExportNextJs(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 text-sm text-left">
+              <FileCode2 className="w-4 h-4 text-violet-400" /> Next.js App Router <span className="text-xs text-zinc-500 ml-auto">page.tsx</span>
+            </button>
+            <button onClick={() => { doExportAstro(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-white/5 text-sm text-left">
+              <Sparkles className="w-4 h-4 text-orange-400" /> Astro Page <span className="text-xs text-zinc-500 ml-auto">.astro</span>
             </button>
             <button onClick={() => { openSocialPreview(); setExportOpen(false); }} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-white/5 text-sm text-left">
               <Eye className="w-4 h-4 text-amber-400" /> Social Card Preview <span className="text-xs text-zinc-500 ml-auto">Inspector</span>
