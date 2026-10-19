@@ -24,7 +24,7 @@ export function parseGitHubUrl(input: string): ParsedRepoUrl | null {
   if (ssh) return { owner: ssh[1], repo: ssh[2] };
 
   // strip protocol
-  s = s.replace(/^https?:\/\//i, '').replace(/\.git$/i, '').replace(/\/+$/, '');
+  s = s.replace(/^https?:\/\//i, '').replace(/\/+$/, '').replace(/\.git$/i, '').replace(/\/+$/, '');
 
   const parts = s.split('/').filter(Boolean);
   if (parts.length >= 2 && GH_HOSTS.includes(parts[0].toLowerCase())) {
