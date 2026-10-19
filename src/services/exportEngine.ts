@@ -248,6 +248,11 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   const langCode = theme.language || 'en';
   const faviconSvg = generateFaviconSvg(meta, theme);
   const faviconDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(faviconSvg)}`;
+  const siteUrl = theme.customDomain
+    ? `https://${theme.customDomain.replace(/^https?:\/\//, '').replace(/\/+$/, '')}/`
+    : (meta.homepage || meta.repoUrl);
+  // Safe JSON string for embedding inside <script> tags (prevents </script> breakout).
+  const jstr = (v: string) => JSON.stringify(v).replace(/</g, '\\u003c');
 
   const tabs = content.quickstart
     .map((t, i) => `<button data-tab="t${i}" class="rl-tab px-4 py-2 text-sm border-b-2 border-transparent font-medium ${i === 0 ? 'rl-tab-active' : ''}">${esc(t.label)}</button>`)
@@ -556,11 +561,11 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 <link rel="manifest" href="./site.webmanifest"/>
 <title>${esc(meta.name)} — ${esc(h.headline)}</title>
 <meta name="description" content="${esc(h.subheadline)}"/>
-<link rel="canonical" href="${esc(meta.homepage || meta.repoUrl)}"/>
+<link rel="canonical" href="${esc(siteUrl)}"/>
 <meta property="og:title" content="${esc(meta.name)} — ${esc(h.headline)}"/>
 <meta property="og:description" content="${esc(h.subheadline)}"/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="${esc(meta.homepage || meta.repoUrl)}"/>
+<meta property="og:url" content="${esc(siteUrl)}"/>
 <meta property="og:image" content="./og-image.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="${esc(meta.name)} — ${esc(h.headline)}"/>
@@ -570,9 +575,9 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": ${JSON.stringify(meta.name)},
-  "headline": ${JSON.stringify(h.headline)},
-  "description": ${JSON.stringify(h.subheadline)},
+  "name": ${jstr(meta.name)},
+  "headline": ${jstr(h.headline)},
+  "description": ${jstr(h.subheadline)},
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "All",
   "offers": {
@@ -582,10 +587,10 @@ export function generateStandaloneHTML(meta: RepoMetadata, content: LandingPageC
   },
   "author": {
     "@type": "Person",
-    "name": ${JSON.stringify(meta.owner)}
+    "name": ${jstr(meta.owner)}
   },
-  "url": ${JSON.stringify(meta.homepage || meta.repoUrl)},
-  "codeRepository": ${JSON.stringify(meta.repoUrl)}
+  "url": ${jstr(siteUrl)},
+  "codeRepository": ${jstr(meta.repoUrl)}
 }
 </script>${analyticsScript ? '\n' + analyticsScript : ''}
 <style>
